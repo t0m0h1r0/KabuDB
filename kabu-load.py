@@ -225,4 +225,4 @@ if __name__ == '__main__':
     if args.update_all:
         d.updateAllStocks()
     else:
-        d.updateDateStocks(int(args.date))
+        d.updateDateStocks(args.date)
