@@ -117,8 +117,6 @@ class StockDB:
         for x in result:
             dates.append(x['Date'])
         diff = set(self._jpxlist.keys()) - set(dates)
-        print(sorted(dates))
-        print(diff)
         for date in diff:
             print(date)
             self.updateDateStocks(date)
