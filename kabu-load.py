@@ -110,9 +110,23 @@ class StockDB:
                     self._db.begin()
         self._db.commit()
 
-    def downloadDateStock(self,date):
+    def updateDiffStocks(self):
+        self._jpxlist = self.downloadDateStocksList()
+        result = self._prices.find(Code=6501)
+        dates = []
+        for x in result:
+            dates.append(x['Date'])
+        diff = set(self._jpxlist.keys()) - set(dates)
+        print(sorted(dates))
+        print(diff)
+        for date in diff:
+            print(date)
+            self.updateDateStocks(date)
+
+
+    def downloadDateStocks(self,date):
         if not date in self._jpxlist:
-            self._jpxlist = self.downloadDateStockList()
+            self._jpxlist = self.downloadDateStocksList()
             if not date in self._jpxlist:
                 raise
         parent,filename = self._jpxlist[date]
@@ -139,7 +153,7 @@ class StockDB:
                     stocks.update(self.pdf_parser(df))
         return stocks
 
-    def downloadDateStockList(self):
+    def downloadDateStocksList(self):
         _urls = [
         'https://www.jpx.co.jp/markets/statistics-equities/daily/index.html',
         'https://www.jpx.co.jp/markets/statistics-equities/daily/00-archives-01.html',
@@ -176,7 +190,7 @@ class StockDB:
 
 
     def updateDateStocks(self,date):
-        stocks = self.downloadDateStock(date)
+        stocks = self.downloadDateStocks(date)
         self._db.begin()
         for n,code in enumerate(self.getCodes()):
             if code in stocks:
@@ -217,12 +231,14 @@ if __name__ == '__main__':
     parser.add_argument('-c','--update_code',action='store_true')
     parser.add_argument('-a','--update_all',action='store_true')
     parser.add_argument('-d','--date',type=int,default=20190401)
+    parser.add_argument('-y','--year',type=int,default=2019)
     args = parser.parse_args()
 
     d=StockDB()
     if args.update_code:
         d.update()
-    if args.update_all:
-        d.updateAllStocks()
+    elif args.update_all:
+        d.updateAllStocks(years=[args.year])
     else:
-        d.updateDateStocks(args.date)
+        d.updateDiffStocks()
+        #d.updateDateStocks(args.date)
