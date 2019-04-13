@@ -20,7 +20,58 @@ class StockDB:
         self._prices = self._db['Prices']
         self._keys = ['Code','Date','Begin','High','Low','End','Amount']
         self._jpxlist = {}
+    def getEnd(self,code=6501,date=20190401,term=15):
+        result = self._prices.find(
+        Code=code,
+        Date={'<=':date},
+        order_by='-Date',
+        _limit=term,
+        )
+        data = [x['End'] for x in result]
+        return data
+    def getOHLC(self,code=6501,date=20190401,term=15):
+        result = self._prices.find(
+        Code=code,
+        Date={'<=':date},
+        order_by='-Date',
+        _limit=term,
+        )
+        data = [(x['Date'],x['Begin'],x['High'],x['Low'],x['End']) for x in result]
+        return data
 
+
+class StockDB_Analyzer(StockDB):
+    def Average(self,code,date):
+        ret = []
+        for term in [5,25,75]:
+            result = self._prices.find(
+            Code=code,
+            Date={'<=':date},
+            order_by='-Date',
+            _limit=term,
+            )
+            data = [x['End'] for x in result]
+            ret.append(float(sum(data))/float(len(data)))
+        return ret
+
+    def RSI(self,code,date):
+        ret = []
+        for term in [14]:
+            result = self._prices.find(
+            Code=code,
+            Date={'<=':date},
+            order_by='-Date',
+            _limit=term+1,
+            )
+            data = [x['End'] for x in result]
+            diff = list(map(lambda x:x[0]-x[1],zip(data,data[1:])))
+            a = list(filter(lambda x:x>0.,diff))
+            b = list(filter(lambda x:x<0.,diff))
+            ret.append( 100.*sum(a)/(sum(a)-sum(b)) )
+        return ret
+
+
+class StockDB_Updater(StockDB):
     def stock_cvs_parse(self,line):
         index = [
         ('Year',int),('Month',int),('Day',int),
@@ -224,19 +275,4 @@ class StockDB:
 
 
 if __name__ == '__main__':
-    import argparse as ap
-    parser = ap.ArgumentParser()
-    parser.add_argument('-c','--update_code',action='store_true')
-    parser.add_argument('-a','--update_all',action='store_true')
-    parser.add_argument('-d','--date',type=int,default=20190401)
-    parser.add_argument('-y','--year',type=int,default=2019)
-    args = parser.parse_args()
-
-    d=StockDB()
-    if args.update_code:
-        d.update()
-    elif args.update_all:
-        d.updateAllStocks(years=[args.year])
-    else:
-        d.updateDiffStocks()
-        #d.updateDateStocks(args.date)
+    pass
