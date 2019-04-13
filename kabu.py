@@ -21,6 +21,42 @@ class StockDB:
         self._keys = ['Code','Date','Begin','High','Low','End','Amount']
         self._jpxlist = {}
 
+class StockDB_Analyzer(StockDB):
+    def MA25(self,code,date):
+        result = self._prices.find(
+        Code=code,
+        Date={'<=':date},
+        order_by='-Date',
+        _limit=25,
+        )
+        data = [x['End'] for x in result]
+        return float(sum(data))/float(len(data))
+
+    def MA75(self,code,date):
+        result = self._prices.find(
+        Code=code,
+        Date={'<=':date},
+        order_by='-Date',
+        _limit=25,
+        )
+        data = [x['End'] for x in result]
+        return float(sum(data))/float(len(data))
+
+    def RSI(self,code,date):
+        result = self._prices.find(
+        Code=code,
+        Date={'<=':date},
+        order_by='-Date',
+        _limit=15,
+        )
+        data = [x['End'] for x in result]
+        diff = list(map(lambda x:x[1]-x[0],zip(data,data[1:])))
+        a = list(filter(lambda x:x>0.,diff))
+        b = list(filter(lambda x:x<0.,diff))
+        return 100.*sum(a)/(sum(a)-sum(b))
+
+
+class StockDB_Updater(StockDB):
     def stock_cvs_parse(self,line):
         index = [
         ('Year',int),('Month',int),('Day',int),
@@ -224,19 +260,4 @@ class StockDB:
 
 
 if __name__ == '__main__':
-    import argparse as ap
-    parser = ap.ArgumentParser()
-    parser.add_argument('-c','--update_code',action='store_true')
-    parser.add_argument('-a','--update_all',action='store_true')
-    parser.add_argument('-d','--date',type=int,default=20190401)
-    parser.add_argument('-y','--year',type=int,default=2019)
-    args = parser.parse_args()
-
-    d=StockDB()
-    if args.update_code:
-        d.update()
-    elif args.update_all:
-        d.updateAllStocks(years=[args.year])
-    else:
-        d.updateDiffStocks()
-        #d.updateDateStocks(args.date)
+    pass
