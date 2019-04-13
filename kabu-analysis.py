@@ -1,10 +1,13 @@
 if __name__ == '__main__':
     from kabu import StockDB_Analyzer
+    import datetime
+    today = int('{0:%Y%m%d}'.format(datetime.date.today()))
+
     import argparse as ap
     parser = ap.ArgumentParser()
     parser.add_argument('-r','--rsi',action='store_true')
     parser.add_argument('-a','--average',action='store_true')
-    parser.add_argument('-d','--date',type=int,default=20190401)
+    parser.add_argument('-d','--date',type=int,default=today)
     parser.add_argument('-c','--code',type=int,default=6501)
     args = parser.parse_args()
 
