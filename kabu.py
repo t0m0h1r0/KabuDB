@@ -20,40 +20,55 @@ class StockDB:
         self._prices = self._db['Prices']
         self._keys = ['Code','Date','Begin','High','Low','End','Amount']
         self._jpxlist = {}
+    def getEnd(self,code=6501,date=20190401,term=15):
+        result = self._prices.find(
+        Code=code,
+        Date={'<=':date},
+        order_by='-Date',
+        _limit=term,
+        )
+        data = [x['End'] for x in result]
+        return data
+    def getOHLC(self,code=6501,date=20190401,term=15):
+        result = self._prices.find(
+        Code=code,
+        Date={'<=':date},
+        order_by='-Date',
+        _limit=term,
+        )
+        data = [(x['Date'],x['Begin'],x['High'],x['Low'],x['End']) for x in result]
+        return data
+
 
 class StockDB_Analyzer(StockDB):
-    def MA25(self,code,date):
-        result = self._prices.find(
-        Code=code,
-        Date={'<=':date},
-        order_by='-Date',
-        _limit=25,
-        )
-        data = [x['End'] for x in result]
-        return float(sum(data))/float(len(data))
-
-    def MA75(self,code,date):
-        result = self._prices.find(
-        Code=code,
-        Date={'<=':date},
-        order_by='-Date',
-        _limit=25,
-        )
-        data = [x['End'] for x in result]
-        return float(sum(data))/float(len(data))
+    def Average(self,code,date):
+        ret = []
+        for term in [5,25,75]:
+            result = self._prices.find(
+            Code=code,
+            Date={'<=':date},
+            order_by='-Date',
+            _limit=term,
+            )
+            data = [x['End'] for x in result]
+            ret.append(float(sum(data))/float(len(data)))
+        return ret
 
     def RSI(self,code,date):
-        result = self._prices.find(
-        Code=code,
-        Date={'<=':date},
-        order_by='-Date',
-        _limit=15,
-        )
-        data = [x['End'] for x in result]
-        diff = list(map(lambda x:x[1]-x[0],zip(data,data[1:])))
-        a = list(filter(lambda x:x>0.,diff))
-        b = list(filter(lambda x:x<0.,diff))
-        return 100.*sum(a)/(sum(a)-sum(b))
+        ret = []
+        for term in [14]:
+            result = self._prices.find(
+            Code=code,
+            Date={'<=':date},
+            order_by='-Date',
+            _limit=term+1,
+            )
+            data = [x['End'] for x in result]
+            diff = list(map(lambda x:x[0]-x[1],zip(data,data[1:])))
+            a = list(filter(lambda x:x>0.,diff))
+            b = list(filter(lambda x:x<0.,diff))
+            ret.append( 100.*sum(a)/(sum(a)-sum(b)) )
+        return ret
 
 
 class StockDB_Updater(StockDB):
