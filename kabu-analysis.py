@@ -19,4 +19,3 @@ if __name__ == '__main__':
             print('RSI: ',a.RSI(code,args.date))
         if args.average:
             print('Ave: ',a.Average(code,args.date))
-    print(*a.getOHLC())
