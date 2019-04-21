@@ -115,6 +115,4 @@ if __name__ == '__main__':
     print(args)
 
     a=StockDB_Analyzer()
-    print(a.EMA(6501,20190411))
-    print(a.MACD(6501,20190411))
     a.update()
