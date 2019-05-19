@@ -27,7 +27,7 @@ class Kabu:
     def _save(self):
         with open(self._filename+'.json','w') as f:
             f.write(self._model.to_json())
-        self._model.save_weights('N225.hdf5')
+        self._model.save_weights(self._filename+'.hdf5')
 
     def _load(self):
         with open(self._filename+'.json','r') as f:
