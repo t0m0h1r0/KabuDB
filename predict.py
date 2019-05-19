@@ -9,6 +9,7 @@ from keras.layers import Dense, Activation, Dropout
 from keras.layers.recurrent import LSTM
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
+from sklearn.preprocessing import MinMaxScaler
 
 class Kabu:
     def __init__(self,filename='^N225.csv'):
@@ -21,7 +22,7 @@ class Kabu:
 
     def _read(self):
         df = pd.read_csv(self._filename,index_col=0)
-        self._data = np.log(df.dropna(how='any')[df.Volume>0.])
+        self._data = np.log(df.dropna(how='any')[df.Volume>0.])[-2000:]
 
     def _save(self):
         with open('config.json','w') as f:
@@ -45,54 +46,61 @@ class Kabu:
     def _trade(self,data):
         f_data = data.reset_index(drop=True)
 
-        buy = f_data.at[0,'Open']
-        last = self._config['keep']-1
+        #翌日購入
+        buy = f_data.at[1,'Open']
+        #最大last日後まで保有
+        last = self._config['keep']+1
+        #最低利益
         threshold = self._config['change']+1.
 
-        category = np.zeros(last+1)
-        for day in range(1,last):
+        category = np.zeros(last-1)
+        #最終日前日でなく、翌日値上がり期待するなら売らない
+        #最終日前日でなく、翌日値上がり期待できないなら売る
+        for day in range(2,last-1):
             sell = f_data.at[day,'Open']
-            keep = f_data.at[day+1,'Open']
+            keep = f_data.at[1+day,'Open']
             if buy + np.log(threshold) < sell and sell > keep:
-                category[day]=1
+                category[day-1]=1
                 break
+        #最終日前日なら売る
         else:
-            sell = f_data.at[last,'Open']
+            sell = f_data.at[last-1,'Open']
             if buy + np.log(threshold) < sell:
-                category[last]=1
+                category[last-2]=1
+            #買うべきでない
             else:
                 category[0]=1
         assert sum(category)==1, '条件漏れ'
 
         return category
 
-    def _mkdataset(self):
+    def _mkDataset(self):
         term = self._config['term']
         keep = self._config['keep']
         k_end = len(self._data)
+        scaler = MinMaxScaler(feature_range=(0, 1))
 
         dataset = []
         label   = []
         recent  = []
-        for k in range(term,k_end-keep):
+        for k in range(term,k_end):
             data = self._series(self._data[k-term:k])
             dataset.append(data)
-        for k in range(term,k_end-keep):
-            data = self._trade(self._data[k:k+keep])
+        for k in range(term,k_end-keep-1):
+            data = self._trade(self._data[k:k+keep+1])
             label.append(data)
-        for k in range(k_end-keep,k_end):
+        '''
+        for k in range(k_end-keep-1,k_end):
             data = self._series(self._data[k-term:k])
             recent.append(data)
+        '''
 
-        from sklearn.preprocessing import MinMaxScaler
-        scaler = MinMaxScaler(feature_range=(0, 1))
-        self._x = np.reshape(scaler.fit_transform(dataset),
+        x = np.reshape(scaler.fit_transform(dataset),
             (len(dataset),term,self._data.shape[1]))
-        self._y = np.reshape(label,(len(dataset),keep))
-        self._z = np.reshape(scaler.fit_transform(recent),
-            (len(recent),term,self._data.shape[1]))
+        self._x,self._z = np.split(x,[len(label)])
+        self._y = np.reshape(label,(len(label),keep))
 
-    def _model(self):
+    def _mkModel(self):
         days = self._config['term']
         dimension = 6
         model = Sequential()
@@ -102,9 +110,11 @@ class Kabu:
             dropout=0.5,
             recurrent_dropout=0.5,
             return_sequences=False,
+            activation='relu',
             batch_input_shape=(None, days, dimension)))
-        model.add(Dense(self._config['keep']))
-        model.add(Activation("linear"))
+        model.add(Dense(75))
+        model.add(Dense(25))
+        model.add(Dense(self._config['keep'],activation='softmax'))
         optimizer = Adam(lr=0.001)
         model.compile(loss="mean_squared_error", optimizer=optimizer)
         model.fit(self._x, self._y, epochs=100, batch_size=512, validation_split=0.1)
@@ -118,17 +128,22 @@ class Kabu:
 if __name__ == '__main__':
     import argparse as ap
     parser = ap.ArgumentParser()
-    #parser.add_argument('-l','--load_model',action='store_true')
     parser.add_argument('-c','--calculate_model',action='store_true')
+    parser.add_argument('-p','--plot',action='store_true')
     args = parser.parse_args()
 
     a=Kabu()
     a._read()
-    a._mkdataset()
-    if(args.calculate_model):
-        a._model()
+    if(args.plot):
+        from keras.utils import plot_model
+        a._load()
+        plot_model(a._model, to_file="model.png", show_shapes=True)
+    elif(args.calculate_model):
+        a._mkDataset()
+        a._mkModel()
         a._predict()
         a._save()
     else:
         a._load()
+        a._mkDataset()
         a._predict()
