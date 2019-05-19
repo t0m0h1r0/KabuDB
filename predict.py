@@ -181,7 +181,7 @@ if __name__ == '__main__':
     if(args.plot):
         from keras.utils import plot_model
         a._load()
-        plot_model(a._model, to_file="model.png", show_shapes=True)
+        a._model.summary()
     elif(args.calculate_model):
         a._mkDataset()
         a._mkModel()
