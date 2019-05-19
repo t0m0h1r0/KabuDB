@@ -1,6 +1,10 @@
 /kabu.db
 /kabu.db-journal
 /.x.pdf
+/.DS_Store
+/*.json
+/*.hdf5
+/*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
