@@ -103,15 +103,6 @@ class Kabu:
             recurrent_dropout=0.5,
             return_sequences=False,
             batch_input_shape=(None, days, dimension)))
-        '''
-        model.add(LSTM(
-            self._ml['hidden'],
-            use_bias=True,
-            dropout=0.5,
-            recurrent_dropout=0.5,
-            return_sequences=False,
-            input_shape=(None, training_days, dimension)))
-        '''
         model.add(Dense(self._config['keep']))
         model.add(Activation("linear"))
         optimizer = Adam(lr=0.001)
