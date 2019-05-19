@@ -25,14 +25,14 @@ class Kabu:
         self._data = np.log(df.dropna(how='any')[df.Volume>0.])[-2000:]
 
     def _save(self):
-        with open('config.json','w') as f:
+        with open(self._filename+'.json','w') as f:
             f.write(self._model.to_json())
         self._model.save_weights('N225.hdf5')
 
     def _load(self):
-        with open('config.json','r') as f:
+        with open(self._filename+'.json','r') as f:
             self._model = model_from_json(f.read())
-        self._model.load_weights('N225.hdf5')
+        self._model.load_weights(self._filename+'.hdf5')
 
     def _series(self,data):
         d=[]
@@ -116,7 +116,7 @@ class Kabu:
         model.add(Dense(25))
         model.add(Dense(self._config['keep'],activation='softmax'))
         optimizer = Adam(lr=0.001)
-        model.compile(loss="mean_squared_error", optimizer=optimizer)
+        model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['accuracy'])
         model.fit(self._x, self._y, epochs=100, batch_size=512, validation_split=0.1)
         self._model = model
 
