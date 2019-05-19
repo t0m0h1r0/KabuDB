@@ -19,6 +19,7 @@ class Kabu:
         self._ml = {'hidden':300,}
         self._x = []
         self._y = []
+        self._z = []
 
     def _read(self):
         df = pd.read_csv(self._filename,index_col=0)
@@ -42,6 +43,54 @@ class Kabu:
 
         #print( np.log(f_data[0:1]).values[0] )
         return f_data[0:1].values[0]
+
+    def _trade3(self,data):
+        f_data = data.reset_index(drop=True)
+
+        #翌日購入
+        buy = f_data.at[1,'Open']
+        #最大last日後まで保有
+        last = self._config['keep']+1
+        #最低利益
+        threshold_p = 1.+self._config['change']
+
+        category = np.zeros(2)
+        #最終日までに閾値を超過もしくは下回るか
+        for day in range(2,last):
+            sell = f_data.at[day,'Open']
+            if buy + np.log(threshold_p) < sell:
+                category[1]=1
+                break
+        else:
+            category[0]=1
+        assert sum(category)==1, '条件漏れ'
+        return category
+
+    def _trade2(self,data):
+        f_data = data.reset_index(drop=True)
+
+        #翌日購入
+        buy = f_data.at[1,'Open']
+        #最大last日後まで保有
+        last = self._config['keep']+1
+        #最低利益
+        threshold_p = 1.+self._config['change']
+        threshold_m = 1.-self._config['change']
+
+        category = np.zeros(3)
+        #最終日までに閾値を超過もしくは下回るか
+        for day in range(2,last):
+            sell = f_data.at[day,'Open']
+            if buy + np.log(threshold_p) < sell:
+                category[1]=1
+                break
+            if buy + np.log(threshold_m) > sell:
+                category[2]=1
+                break
+        else:
+            category[0]=1
+        assert sum(category)==1, '条件漏れ'
+        return category
 
     def _trade(self,data):
         f_data = data.reset_index(drop=True)
@@ -71,7 +120,6 @@ class Kabu:
             else:
                 category[0]=1
         assert sum(category)==1, '条件漏れ'
-
         return category
 
     def _mkDataset(self):
@@ -89,16 +137,11 @@ class Kabu:
         for k in range(term,k_end-keep-1):
             data = self._trade(self._data[k:k+keep+1])
             label.append(data)
-        '''
-        for k in range(k_end-keep-1,k_end):
-            data = self._series(self._data[k-term:k])
-            recent.append(data)
-        '''
 
         x = np.reshape(scaler.fit_transform(dataset),
             (len(dataset),term,self._data.shape[1]))
         self._x,self._z = np.split(x,[len(label)])
-        self._y = np.reshape(label,(len(label),keep))
+        self._y = np.reshape(label,(len(label),len(label[0])))
 
     def _mkModel(self):
         days = self._config['term']
@@ -113,11 +156,11 @@ class Kabu:
             activation='relu',
             batch_input_shape=(None, days, dimension)))
         model.add(Dense(75))
-        model.add(Dense(25))
-        model.add(Dense(self._config['keep'],activation='softmax'))
+        #model.add(Dense(25))
+        model.add(Dense(len(self._y[0]),activation='softmax'))
         optimizer = Adam(lr=0.001)
         model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['accuracy'])
-        model.fit(self._x, self._y, epochs=100, batch_size=512, validation_split=0.1)
+        model.fit(self._x, self._y, epochs=100, batch_size=512, validation_split=0.2)
         self._model = model
 
     def _predict(self):
@@ -130,9 +173,10 @@ if __name__ == '__main__':
     parser = ap.ArgumentParser()
     parser.add_argument('-c','--calculate_model',action='store_true')
     parser.add_argument('-p','--plot',action='store_true')
+    parser.add_argument('-f','--filename',type=str,default='^N225.csv')
     args = parser.parse_args()
 
-    a=Kabu()
+    a=Kabu(filename=args.filename)
     a._read()
     if(args.plot):
         from keras.utils import plot_model
