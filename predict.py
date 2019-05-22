@@ -15,7 +15,12 @@ class Kabu:
     def __init__(self,filename='^N225.csv'):
         self._data =[]
         self._filename = filename
-        self._config = {'keep':2,'term':25,'change':0.03,'cat':(-.05,-.03,-.01,.0,+.01,+.03,+.05)}
+        self._config = {
+            'keep':3,
+            'term':25,
+            'change':0.03,
+            'category':(-.03,-.01,.0,+.01,+.03),
+            }
         #self._config = {'keep':2,'term':25,'change':0.03,'cat':(-.03,-.01,.0,+.01,+.03)}
         self._ml = {'hidden':500,'epoch':50,'batch':32}
         self._x = []
@@ -26,10 +31,10 @@ class Kabu:
         self._data = pd.read_csv(self._filename,index_col=0)
         #self._data = self._data[self._data.Volume>0.]
         self._data = self._data.drop('Volume',axis=1)
-        self._data = self._data.drop('Adj Close',axis=1)
-        self._data = self._data.drop('Close',axis=1)
-        self._data = self._data.drop('High',axis=1)
-        self._data = self._data.drop('Low',axis=1)
+        #self._data = self._data.drop('Adj Close',axis=1)
+        #self._data = self._data.drop('Close',axis=1)
+        #self._data = self._data.drop('High',axis=1)
+        #self._data = self._data.drop('Low',axis=1)
         self._data = self._data.dropna(how='any')
         self._data = np.log(self._data)[-500:]
 
@@ -43,61 +48,27 @@ class Kabu:
             self._model = model_from_json(f.read())
         self._model.load_weights(self._filename+'.hdf5')
 
-    def _series(self,data):
-        d=[]
-        for day in range(self._config['term']):
-            d.append(data[day:].reset_index(drop=True))
-        f_data = pd.concat(d,axis=1).dropna(how='any')
+    def _rule(self,data):
 
-        #print( np.log(f_data[0:1]).values[0] )
-        return f_data[0:1].values[0]
+        output = []
+        for k in data.index:
+            #翌日購入,翌々日売却
+            buy = data.at[k,(1,'Open')]
+            sell = data.at[k,(2,'Open')]
+            category = np.zeros(len(self._config['category'])+1)
 
-    def _trade(self,data):
-        f_data = data.reset_index(drop=True)
-
-        #翌日購入
-        buy = f_data.at[1,'Open']
-        #最大last日後まで保有
-        last = self._config['keep']+1
-        #最低利益
-        threshold = self._config['change']+1.
-
-        category = np.zeros(last-1)
-        #最終日前日でなく、翌日値上がり期待するなら売らない
-        #最終日前日でなく、翌日値上がり期待できないなら売る
-        for day in range(2,last-1):
-            sell = f_data.at[day,'Open']
-            keep = f_data.at[1+day,'Open']
-            if buy + np.log(threshold) < sell and sell > keep:
-                category[day-1]=1
-                break
-        #最終日前日なら売る
-        else:
-            sell = f_data.at[last-1,'Open']
-            if buy + np.log(threshold) < sell:
-                category[last-2]=1
-            #買うべきでない
+            for j,theta in enumerate(self._config['category']):
+                if sell - buy < np.log(1+theta):
+                    category[j] = 1.
+                    break
             else:
-                category[0]=1
-        assert sum(category)==1, '条件漏れ'
-        return category
+                category[len(self._config['category'])] = 1.
+            assert sum(category)==1, '条件漏れ'
+            output.append(category)
 
-    def _trade2(self,data):
-        f_data = data.reset_index(drop=True)
+        output = pd.DataFrame(output,index=data.index)
 
-        #翌日購入,翌々日売却
-        buy = f_data.at[1,'Open']
-        sell = f_data.at[2,'Open']
-        category = np.zeros(len(self._config['cat'])+1)
-        for k,x in enumerate(self._config['cat']):
-            if sell-buy<np.log(1.+x):
-                category[k]=1
-                break
-        else:
-            category[-1]=1
-
-        assert sum(category)==1, '条件漏れ'
-        return category
+        return output
 
     def _mkDataset(self):
         term = self._config['term']
@@ -105,30 +76,31 @@ class Kabu:
         k_end = len(self._data)
         scaler = MinMaxScaler(feature_range=(0, 1))
 
-        dataset = []
         label   = []
         recent  = []
-        for k in range(term,k_end):
-            data = self._series(self._data[k-term:k])
-            dataset.append(data)
-        for k in range(term,k_end-keep-1):
-            data = self._trade2(self._data[k:k+keep+1])
-            label.append(data)
+        before = pd.concat([self._data.shift(+k) for k in range(term)], axis=1, keys=range(term))
+        before = before.dropna(how='any')
 
-        x = np.reshape(scaler.fit_transform(dataset),
-            (len(dataset),term,self._data.shape[1]))
-        self._x,self._z = np.split(x,[len(label)])
-        self._y = np.reshape(label,(len(label),len(label[0])))
+        after = pd.concat([self._data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
+        after = after.dropna(how='any')
+        after = after[after.index.isin(before.index)]
+
+        dataset = np.reshape(before.values,
+            [len(before.index), self._config['term'], len(self._data.columns)])
+        label = self._rule(after)
+
+        self._y = label.values
+        self._x,self._z = np.split(dataset,[len(self._y)])
 
     def _mkModel(self):
         days = self._config['term']
         dimension = len(self._data.columns)
         model = Sequential()
-        #model.add(InputLayer(input_shape=(days,dimension)))
+        model.add(InputLayer(input_shape=(days,dimension)))
         model.add(LSTM(
             self._ml['hidden'],
             return_sequences=False,
-            input_shape=(days, dimension),
+            #input_shape=(days, dimension),
             activation='relu'))
             #batch_input_shape=(None, days, dimension)))
         model.add(Dropout(0.2))
