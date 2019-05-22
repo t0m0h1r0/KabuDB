@@ -17,12 +17,11 @@ class Kabu:
         self._filename = filename
         self._config = {
             'keep':3,
-            'term':25,
-            'change':0.03,
-            'category':(-.03,-.01,.0,+.01,+.03),
+            'term':75,
+            'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
         #self._config = {'keep':2,'term':25,'change':0.03,'cat':(-.03,-.01,.0,+.01,+.03)}
-        self._ml = {'hidden':500,'epoch':50,'batch':32}
+        self._ml = {'hidden':800,'epoch':50,'batch':64}
         self._x = []
         self._y = []
         self._z = []
@@ -31,10 +30,6 @@ class Kabu:
         self._data = pd.read_csv(self._filename,index_col=0)
         #self._data = self._data[self._data.Volume>0.]
         self._data = self._data.drop('Volume',axis=1)
-        #self._data = self._data.drop('Adj Close',axis=1)
-        #self._data = self._data.drop('Close',axis=1)
-        #self._data = self._data.drop('High',axis=1)
-        #self._data = self._data.drop('Low',axis=1)
         self._data = self._data.dropna(how='any')
         self._data = np.log(self._data)[-500:]
 
@@ -54,7 +49,7 @@ class Kabu:
         for k in data.index:
             #翌日購入,翌々日売却
             buy = data.at[k,(1,'Open')]
-            sell = data.at[k,(2,'Open')]
+            sell = data.at[k,(1,'Close')]
             category = np.zeros(len(self._config['category'])+1)
 
             for j,theta in enumerate(self._config['category']):
@@ -73,11 +68,9 @@ class Kabu:
     def _mkDataset(self):
         term = self._config['term']
         keep = self._config['keep']
-        k_end = len(self._data)
         scaler = MinMaxScaler(feature_range=(0, 1))
+        data = scaler.fit_transform(self._data)
 
-        label   = []
-        recent  = []
         before = pd.concat([self._data.shift(+k) for k in range(term)], axis=1, keys=range(term))
         before = before.dropna(how='any')
 
@@ -96,11 +89,11 @@ class Kabu:
         days = self._config['term']
         dimension = len(self._data.columns)
         model = Sequential()
-        model.add(InputLayer(input_shape=(days,dimension)))
+        #model.add(InputLayer(input_shape=(days,dimension)))
         model.add(LSTM(
             self._ml['hidden'],
             return_sequences=False,
-            #input_shape=(days, dimension),
+            input_shape=(days, dimension),
             activation='relu'))
             #batch_input_shape=(None, days, dimension)))
         model.add(Dropout(0.2))
