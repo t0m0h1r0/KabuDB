@@ -3,6 +3,8 @@
 
 import numpy as np
 import pandas as pd
+import scipy as sp
+import scipy.fftpack
 
 from keras.models import Sequential, model_from_json
 from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional
@@ -17,11 +19,11 @@ class Kabu:
         self._filename = filename
         self._config = {
             'keep':3,
-            'term':75,
+            'term':64,
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
         #self._config = {'keep':2,'term':25,'change':0.03,'cat':(-.03,-.01,.0,+.01,+.03)}
-        self._ml = {'hidden':800,'epoch':50,'batch':64}
+        self._ml = {'hidden':300,'epoch':50,'batch':64}
         self._x = []
         self._y = []
         self._z = []
@@ -69,18 +71,21 @@ class Kabu:
         term = self._config['term']
         keep = self._config['keep']
         scaler = MinMaxScaler(feature_range=(0, 1))
-        data = scaler.fit_transform(self._data)
 
+        #当日を含めてterm日間のデータを横に並べる
         before = pd.concat([self._data.shift(+k) for k in range(term)], axis=1, keys=range(term))
         before = before.dropna(how='any')
 
+        #翌日からkeep日間のデータを横に並べる
         after = pd.concat([self._data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
         after = after.dropna(how='any')
         after = after[after.index.isin(before.index)]
 
-        dataset = np.reshape(before.values,
+        #無駄な処理だが、Pandasを維持するため、NumPyにする直前でMinMax
+        dataset = np.reshape(scaler.fit_transform(before.values),
             [len(before.index), self._config['term'], len(self._data.columns)])
         label = self._rule(after)
+        #wave = sp.fftpack.dct(before,axis=1)
 
         self._y = label.values
         self._x,self._z = np.split(dataset,[len(self._y)])
@@ -115,19 +120,23 @@ class Kabu:
         ans = list(zip(self._y,ans))
         for input,output in np.round(ans,decimals=2):
             print(input,output)
+        print()
+        x = np.sum(self._y,axis=0)
+        print(x/np.sum(x))
+
 
 if __name__ == '__main__':
     import argparse as ap
     parser = ap.ArgumentParser()
     parser.add_argument('-c','--calculate_model',action='store_true')
-    parser.add_argument('-p','--plot',action='store_true')
+    parser.add_argument('-v','--visualize',action='store_true')
     parser.add_argument('-f','--filename',type=str,default='^N225.csv')
     parser.add_argument('-a','--compare_all',action='store_true')
     args = parser.parse_args()
 
     a=Kabu(filename=args.filename)
     a._read()
-    if(args.plot):
+    if(args.visualize):
         from keras.utils import plot_model
         a._load()
         a._model.summary()
