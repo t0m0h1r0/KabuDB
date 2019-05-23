@@ -7,8 +7,8 @@ import scipy as sp
 import scipy.fftpack
 
 from keras.models import Sequential, model_from_json, Model
-from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, Input, Multiply
-from keras.layers.recurrent import LSTM
+from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, Input, Multiply, Concatenate
+from keras.layers.recurrent import LSTM, RNN, SimpleRNN
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from sklearn.preprocessing import MinMaxScaler
@@ -22,11 +22,12 @@ class Kabu:
             'term':64,
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
-        #self._config = {'keep':2,'term':25,'change':0.03,'cat':(-.03,-.01,.0,+.01,+.03)}
-        self._ml = {'hidden':500,'epoch':100,'batch':64}
+        self._ml = {'hidden':500,'epoch':200,'batch':64}
         self._x = []
         self._y = []
         self._z = []
+        self._wx = []
+        self._wz = []
 
     def _read(self):
         self._data = pd.read_csv(self._filename,index_col=0)
@@ -102,28 +103,30 @@ class Kabu:
         dimension = len(self._data.columns)
 
         input_raw = Input(shape=(days,dimension))
-        lstm_1 = LSTM(
+        drop_a1 = Dropout(.2)(input_raw)
+        lstm_a = LSTM(
             self._ml['hidden'],
             return_sequences=False,
             input_shape=(days, dimension),
-            activation='relu')(input_raw)
-        drop_1 = Dropout(.1)(lstm_1)
+            activation='relu')(drop_a1)
+        drop_a2 = Dropout(.5)(lstm_a)
 
         input_wav = Input(shape=(dimension,days))
-        lstm_2 = LSTM(
+        drop_b1 = Dropout(.5)(input_wav)
+        lstm_b = LSTM(
             self._ml['hidden'],
             return_sequences=False,
             input_shape=(dimension, days),
-            activation='relu')(input_wav)
-        drop_2 = Dropout(.2)(lstm_2)
+            activation='relu')(drop_b1)
+        drop_b2 = Dropout(.5)(lstm_b)
 
-        multiplied = Multiply()([drop_1,drop_2])
-        dense_1 = Dense(75)(multiplied)
-        dense_2 = Dense(75)(dense_1)
-        dense_3 = Dense(
+        merged = Concatenate()([drop_a2,drop_b2])
+        #merged = Multiply()([drop_1,drop_2])
+        dense_1 = Dense(75)(merged)
+        dense_2 = Dense(
             len(self._y[0]),
-            kernel_initializer='glorot_uniform')(dense_2)
-        output = Activation('softmax')(dense_3)
+            kernel_initializer='glorot_uniform')(dense_1)
+        output = Activation('softmax')(dense_2)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001)
@@ -163,6 +166,7 @@ class Kabu:
         ans = list(zip(self._y,ans))
         for input,output in np.round(ans,decimals=2):
             print(input,output)
+
 
 if __name__ == '__main__':
     import argparse as ap
