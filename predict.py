@@ -112,7 +112,7 @@ class Kabu:
         drop_a2 = Dropout(.5)(lstm_a)
 
         input_wav = Input(shape=(dimension,days))
-        drop_b1 = Dropout(.5)(input_wav)
+        drop_b1 = Dropout(.2)(input_wav)
         lstm_b = LSTM(
             self._ml['hidden'],
             return_sequences=False,
@@ -120,7 +120,7 @@ class Kabu:
             activation='relu')(drop_b1)
         drop_b2 = Dropout(.5)(lstm_b)
 
-        merged = Concatenate()([drop_a2,drop_b2])
+        merged = Concatenate()([drop_a2,drop_2])
         #merged = Multiply()([drop_1,drop_2])
         dense_1 = Dense(75)(merged)
         dense_2 = Dense(
