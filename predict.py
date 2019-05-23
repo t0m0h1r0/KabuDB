@@ -82,7 +82,9 @@ class Kabu:
         after = after[after.index.isin(before.index)]
 
         #無駄な処理だが、Pandasを維持するため、NumPyにする直前でMinMax
-        dataset = np.reshape(scaler.fit_transform(before.values),
+        #1次元にするとMinMaxできないので、二次元化する
+        dataset = np.reshape(
+            scaler.fit_transform(before.values.flatten().reshape(-1,1)),
             [len(before.index), self._config['term'], len(self._data.columns)])
         label = self._rule(after)
         #wave = sp.fftpack.dct(before,axis=1)
