@@ -120,7 +120,7 @@ class Kabu:
             activation='relu')(drop_b1)
         drop_b2 = Dropout(.5)(lstm_b)
 
-        merged = Concatenate()([drop_a2,drop_2])
+        merged = Concatenate()([drop_a2,drop_b2])
         #merged = Multiply()([drop_1,drop_2])
         dense_1 = Dense(75)(merged)
         dense_2 = Dense(
@@ -158,20 +158,22 @@ class Kabu:
         self._model = model
 
     def _predict(self):
+        np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
         ans = self._model.predict([self._z,self._wz])
         print(np.round(ans,decimals=2))
 
     def _predict2(self):
+        np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
         ans = self._model.predict([self._x,self._wx])
         ans = list(zip(self._y,ans))
         for input,output in np.round(ans,decimals=2):
-            print(input,output)
+            print(input,output,'=>',np.multiply(input,output))
 
 
 if __name__ == '__main__':
     import argparse as ap
     parser = ap.ArgumentParser()
-    parser.add_argument('-c','--calculate_model',action='store_true')
+    parser.add_argument('-l','--learn',action='store_true')
     parser.add_argument('-v','--visualize',action='store_true')
     parser.add_argument('-f','--filename',type=str,default='^N225.csv')
     parser.add_argument('-a','--compare_all',action='store_true')
@@ -183,7 +185,7 @@ if __name__ == '__main__':
         from keras.utils import plot_model
         a._load()
         a._model.summary()
-    elif(args.calculate_model):
+    elif(args.learn):
         a._mkDataset()
         a._mkModel2()
         a._predict()
