@@ -65,7 +65,7 @@ class Kabu:
                 category[len(self._config['category'])] = 1.
             assert sum(category)==1, '条件漏れ'
             #output.append(category)
-            output.append(np.exp(sell-buy)-1.)
+            output.append(np.exp(sell-buy))
 
         output = pd.DataFrame(output,index=data.index)
 
