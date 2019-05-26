@@ -113,7 +113,8 @@ class Kabu:
             use_bias=True,
             return_sequences=False,
             input_shape=(days, dimension),
-            activation='relu'))(drop_a1)
+            activation='tanh'))(drop_a1)
+            #activation='relu'))(drop_a1)
         drop_a2 = Dropout(.5)(lstm_a)
 
         input_wav = Input(shape=(dimension,days))
@@ -123,7 +124,8 @@ class Kabu:
             use_bias=True,
             return_sequences=False,
             input_shape=(dimension, days),
-            activation='relu'))(drop_b1)
+            activation='tanh'))(drop_b1)
+            #activation='relu'))(drop_b1)
         drop_b2 = Dropout(.5)(lstm_b)
 
         merged = Concatenate()([drop_a2,drop_b2])
