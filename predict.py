@@ -77,7 +77,7 @@ class Kabu:
             sell = data.at[k,(2,'Open')]
             diff.append(sell-buy)
         diff = np.sort(np.array(diff),axis=0)
-        separator = [diff[int(len(data)/x)] for x in range(counts-1)]
+        separator = [diff[x*int(len(data)/counts)-1] for x in range(counts-1)]
         print(np.exp(1.+diff))
 
         output = []
