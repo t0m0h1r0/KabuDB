@@ -64,8 +64,37 @@ class Kabu:
             else:
                 category[len(self._config['category'])] = 1.
             assert sum(category)==1, '条件漏れ'
-            #output.append(category)
-            output.append(np.exp(sell-buy))
+            output.append(category)
+
+        output = pd.DataFrame(output,index=data.index)
+        return output
+
+    def _rule2(self,data,counts=3):
+        diff = []
+        for k in data.index:
+            #翌日購入,翌々日売却
+            buy = data.at[k,(1,'Open')]
+            sell = data.at[k,(2,'Open')]
+            diff.append(sell-buy)
+        diff = np.sort(np.array(diff),axis=0)
+        separator = [x for diff[int(len(data)/x)] in range(counts-1)]
+        print(np.exp(1.+diff))
+
+        output = []
+        for k in data.index:
+            #翌日購入,翌々日売却
+            buy = data.at[k,(1,'Open')]
+            sell = data.at[k,(2,'Open')]
+            category = np.zeros(counts)
+
+            for j,theta in enumerate(separator):
+                if sell - buy < theta:
+                    category[j] = 1.
+                    break
+            else:
+                category[counts-1] = 1.
+            assert sum(category)==1, '条件漏れ'
+            output.append(category)
 
         output = pd.DataFrame(output,index=data.index)
 
