@@ -69,7 +69,7 @@ class Kabu:
         output = pd.DataFrame(output,index=data.index)
         return output
 
-    def _rule2(self,data,counts=5):
+    def _rule2(self,data,counts=6):
         diff = []
         for k in data.index:
             #翌日購入,翌々日売却
