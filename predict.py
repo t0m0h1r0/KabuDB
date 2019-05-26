@@ -79,7 +79,7 @@ class Kabu:
         diff = np.sort(np.array(diff),axis=0)
         separator = [diff[x*int(len(data)/counts)-1]
             for x in range(1,counts-1)]
-        print(np.exp(np.array(separator)-1.))
+        print(np.exp(np.array(separator))-1.)
         print(diff)
 
         output = []
@@ -90,7 +90,7 @@ class Kabu:
             category = np.zeros(counts)
 
             for j,theta in enumerate(separator):
-                if sell - buy < theta:
+                if sell - buy <= theta:
                     category[j] = 1.
                     break
             else:
