@@ -69,7 +69,7 @@ class Kabu:
         output = pd.DataFrame(output,index=data.index)
         return output
 
-    def _rule2(self,data,counts=5):
+    def _rule2(self,data,counts=6):
         diff = []
         for k in data.index:
             #翌日購入,翌々日売却
@@ -78,7 +78,7 @@ class Kabu:
             diff.append(sell-buy)
         diff = np.sort(np.array(diff),axis=0)
         separator = [diff[x*int(len(data)/counts)-1] for x in range(1,counts)]
-        print(np.exp(1.+np.array(separator)))
+        print(np.exp(np.array(separator)-1.))
         print(diff)
 
         output = []
