@@ -76,20 +76,18 @@ class Kabu:
             buy = data.at[k,(1,'Open')]
             sell = data.at[k,(2,'Open')]
             diff.append(sell-buy)
-        diff.sort()
-        separator = [diff[x*int(len(data)/counts)]
+        s_diff = sorted(diff)
+        separator = [s_diff[x*int(len(data)/counts)]
             for x in range(1,counts)]
-        print(np.exp(np.array(separator))-1.)
+        np.set_printoptions(formatter={'float': '{: 0.1f}'.format})
+        print(100.*(np.exp(np.array(separator))-1.))
 
         output = []
-        for k in data.index:
+        for d in diff:
             #翌日購入,翌々日売却
-            buy = data.at[k,(1,'Open')]
-            sell = data.at[k,(2,'Open')]
             category = np.zeros(counts)
-
             for j,theta in enumerate(separator):
-                if sell - buy < theta:
+                if d < theta:
                     category[j] = 1.
                     break
             else:
