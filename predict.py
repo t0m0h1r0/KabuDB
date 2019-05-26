@@ -142,8 +142,7 @@ class Kabu:
             use_bias=True,
             return_sequences=False,
             input_shape=(days, dimension),
-            activation='tanh'))(drop_a1)
-            #activation='relu'))(drop_a1)
+            activation='relu'))(drop_a1)
         drop_a2 = Dropout(.5)(lstm_a)
 
         input_wav = Input(shape=(dimension,days))
@@ -153,8 +152,7 @@ class Kabu:
             use_bias=True,
             return_sequences=False,
             input_shape=(dimension, days),
-            activation='tanh'))(drop_b1)
-            #activation='relu'))(drop_b1)
+            activation='relu'))(drop_b1)
         drop_b2 = Dropout(.5)(lstm_b)
 
         merged = Concatenate()([drop_a2,drop_b2])
@@ -162,14 +160,12 @@ class Kabu:
         dense_2 = Dense(
             len(self._y[0]),
             kernel_initializer='glorot_uniform')(dense_1)
-        #output = Activation('softmax')(dense_2)
-        output = Activation('linear')(dense_2)
+        output = Activation('softmax')(dense_2)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001)
 
-        model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
-        #model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         self._model = model
 
     def _calculate(self):
