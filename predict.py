@@ -79,7 +79,7 @@ class Kabu:
         diff.sort()
         separator = [diff[x*int(len(data)/counts)-1]
             for x in range(1,counts-1)]
-        print(np.exp(np.array(separator)))
+        print(1.-np.exp(np.array(separator)))
 
         output = []
         for k in data.index:
