@@ -78,7 +78,7 @@ class Kabu:
             diff.append(sell-buy)
         diff = np.sort(np.array(diff),axis=0)
         separator = [diff[x*int(len(data)/counts)-1] for x in range(counts-1)]
-        print(np.exp(1.+diff))
+        print(np.exp(1.+separator))
 
         output = []
         for k in data.index:
