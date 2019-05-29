@@ -110,7 +110,7 @@ class Kabu:
                 if data.at[k,(x,'Low')] - buy  < np.log(1.-.03):
                     category[2]=1.
                     break
-                elif data.at[k,(x,'Open')] - buy < np.log(1.+.05):
+                elif data.at[k,(x,'Open')] - buy >= np.log(1.+.05):
                     category[1]=1.
                     break
             else:
