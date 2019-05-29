@@ -8,7 +8,7 @@ import scipy.fftpack
 
 from keras.models import Sequential, model_from_json, Model
 from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, Input, Multiply, Concatenate
-from keras.layers.recurrent import LSTM, RNN, SimpleRNN
+from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from sklearn.preprocessing import MinMaxScaler
@@ -19,7 +19,7 @@ class Kabu:
         self._filename = filename
         self._config = {
             'days':4000,
-            'keep':3,
+            'keep':25,
             'term':64,
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
@@ -99,6 +99,27 @@ class Kabu:
 
         return output
 
+    def _rule3(self,data):
+        counts=3
+        output = []
+        for k in data.index:
+            #翌日購入,翌々日売却
+            buy = data.at[k,(1,'Open')]
+            category = np.zeros(counts)
+            for x in range(2,self._config['keep']):
+                if data.at[k,(x,'Low')] - buy  < np.log(1.-.03):
+                    category[2]=1.
+                    break
+                elif data.at[k,(x,'Open')] - buy < np.log(1.+.05):
+                    category[1]=1.
+                    break
+            else:
+                category[0]=1.
+            output.append(category)
+
+        output = pd.DataFrame(output,index=data.index)
+        return output
+
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
@@ -118,7 +139,7 @@ class Kabu:
         dataset = np.reshape(
             scaler.fit_transform(before.values.flatten().reshape(-1,1)),
             [len(before.index), self._config['term'], len(self._data.columns)])
-        label = self._rule(after)
+        label = self._rule3(after)
         dataset2 = np.reshape(
             scaler.fit_transform(before.sort_index(axis=1).values.flatten().reshape(-1,1)),
             [len(before.index), len(self._data.columns), self._config['term']])
@@ -136,25 +157,43 @@ class Kabu:
 
         input_raw = Input(shape=(days,dimension))
         drop_a1 = Dropout(.2)(input_raw)
-        lstm_a = Bidirectional(LSTM(
+        lstm_a = Bidirectional(GRU(
+        #lstm_a = Bidirectional(LSTM(
             self._ml['hidden'],
             use_bias=True,
-            return_sequences=False,
+            #return_sequences=False,
+            return_sequences=True,
             input_shape=(days, dimension),
             activation='relu'))(drop_a1)
-        drop_a2 = Dropout(.5)(lstm_a)
+        lstm_a2 = Bidirectional(GRU(
+            self._ml['hidden'],
+        ))(lstm_a)
+        drop_a2 = Dropout(.5)(lstm_a2)
+        #drop_a2 = Dropout(.5)(lstm_a)
 
         input_wav = Input(shape=(dimension,days))
         drop_b1 = Dropout(.2)(input_wav)
-        lstm_b = Bidirectional(LSTM(
+        lstm_b = Bidirectional(GRU(
+        #lstm_b = Bidirectional(LSTM(
             self._ml['hidden'],
             use_bias=True,
-            return_sequences=False,
+            #return_sequences=False,
+            return_sequences=True,
             input_shape=(dimension, days),
             activation='relu'))(drop_b1)
-        drop_b2 = Dropout(.5)(lstm_b)
+        lstm_b2 = Bidirectional(GRU(
+            self._ml['hidden'],
+        ))(lstm_b)
+        drop_b2 = Dropout(.5)(lstm_b2)
+        #drop_b2 = Dropout(.5)(lstm_b)
 
         merged = Concatenate()([drop_a2,drop_b2])
+        '''
+        lstm_2 = Bidirectional(GRU(
+            self._ml['hidden']
+        ))(merged)
+        dense_1 = Dense(5000)(lstm_2)
+        '''
         dense_1 = Dense(5000)(merged)
         dense_2 = Dense(
             len(self._y[0]),
@@ -162,7 +201,7 @@ class Kabu:
         output = Activation('softmax')(dense_2)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
-        optimizer = Adam(lr=0.001)
+        optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
         model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         self._model = model
@@ -174,6 +213,7 @@ class Kabu:
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
             validation_split=0.2,
+            shuffle=False,
             callbacks=[early_stopping])
 
     def _predict(self):
