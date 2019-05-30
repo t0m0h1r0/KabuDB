@@ -76,9 +76,12 @@ class Kabu:
             buy = data.at[k,(1,'Open')]
             sell = data.at[k,(2,'Open')]
             diff.append(sell-buy)
+        separator = pd.qcut(diff,counts)
+        '''
         s_diff = sorted(diff)
         separator = [s_diff[x*int(len(data)/counts)]
             for x in range(1,counts)]
+        '''
         np.set_printoptions(formatter={'float': '{: 0.1f}'.format})
         print(100.*(np.exp(np.array(separator))-1.))
 
