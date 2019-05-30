@@ -83,7 +83,8 @@ class Kabu:
             for x in range(1,counts)]
         '''
         np.set_printoptions(formatter={'float': '{: 0.1f}'.format})
-        print(100.*(np.exp(np.array(separator.value))-1.))
+        print(separator)
+        #print(100.*(np.exp(np.array(separator.value))-1.))
 
         output = []
         for d in diff:
