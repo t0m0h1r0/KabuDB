@@ -77,10 +77,10 @@ class Kabu:
             buy = data.at[k,(1,'Open')]
             sell = data.at[k,(2,'Open')]
             diff.append(sell-buy)
-        #diff = pd.DataFrame(diff,index=data.index)
-        nums = pd.qcut(diff,counts,labels=range(counts))
+        nums, bins = pd.qcut(diff,counts,labels=range(counts),retbins=True)
         output = to_categorical(nums)
         output = pd.DataFrame(output,index=data.index)
+        print(bins)
         return output
 
     def _rule3(self,data):
