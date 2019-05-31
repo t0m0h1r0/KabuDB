@@ -83,7 +83,7 @@ class Kabu:
             sell = data.at[k,(2,'Open')]
             diff.append(sell/buy-1.)
             #diff.append(sell-buy)
-        nums, bins = pd.qcut(diff, borders, labels=range(len(borders)-1),retbins=True)
+        nums, bins = pd.cut(diff, borders, labels=range(len(borders)-1),retbins=True)
         output = to_categorical(nums)
         output = pd.DataFrame(output,index=data.index)
         print((1.-bins)*100.)
