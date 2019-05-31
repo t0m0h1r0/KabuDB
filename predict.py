@@ -143,7 +143,7 @@ class Kabu:
 
         input_raw = Input(shape=(days,dimension))
         drop_a1 = Dropout(.2)(input_raw)
-        lstm_a = Bidirectional(GRU(
+        lstm_a1 = Bidirectional(GRU(
         #lstm_a = Bidirectional(LSTM(
             self._ml['hidden'],
             use_bias=True,
@@ -151,15 +151,16 @@ class Kabu:
             return_sequences=True,
             input_shape=(days, dimension),
             activation='relu'))(drop_a1)
+        drop_a2 = Dropout(.9995)(lstm_a2)
         lstm_a2 = Bidirectional(GRU(
             self._ml['hidden'],
-        ))(lstm_a)
-        drop_a2 = Dropout(.5)(lstm_a2)
+        ))(lstm_a1)
+        drop_a2 = Dropout(.9995)(lstm_a2)
         #drop_a2 = Dropout(.5)(lstm_a)
 
         input_wav = Input(shape=(dimension,days))
         drop_b1 = Dropout(.2)(input_wav)
-        lstm_b = Bidirectional(GRU(
+        lstm_b1 = Bidirectional(GRU(
         #lstm_b = Bidirectional(LSTM(
             self._ml['hidden'],
             use_bias=True,
@@ -167,20 +168,14 @@ class Kabu:
             return_sequences=True,
             input_shape=(dimension, days),
             activation='relu'))(drop_b1)
+        drop_b2 = Dropout(.9995)(lstm_b1)
         lstm_b2 = Bidirectional(GRU(
             self._ml['hidden'],
         ))(lstm_b)
-        drop_b2 = Dropout(.5)(lstm_b2)
+        drop_b2 = Dropout(.9995)(lstm_b2)
         #drop_b2 = Dropout(.5)(lstm_b)
 
         merged = Concatenate()([drop_a2,drop_b2])
-        '''
-        lstm_2 = Bidirectional(GRU(
-            self._ml['hidden']
-        ))(merged)
-        dense_1 = Dense(5000)(lstm_2)
-        '''
-        dense_1 = Dense(5000)(merged)
         dense_2 = Dense(
             len(self._y[0]),
             kernel_initializer='glorot_uniform')(dense_1)
