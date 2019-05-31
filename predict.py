@@ -77,7 +77,7 @@ class Kabu:
             #翌日購入,翌々日売却
             buy = data.at[k,(1,'Open')]
             sell = data.at[k,(2,'Open')]
-            diff.append(sell/buy)
+            diff.append(1.-sell/buy)
             #diff.append(sell-buy)
         nums, bins = pd.qcut(diff,counts,labels=range(counts),retbins=True)
         output = to_categorical(nums)
@@ -132,9 +132,8 @@ class Kabu:
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
             #scaler.fit_transform(before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1)),
             [len(before.index), len(self._data.columns), self._config['term']])
-        #離散コサイン変換
+        #離散フーリエ変換
         wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
-        #wave = np.power(sp.fftpack.dct(dataset2,axis=2),2.)
 
         self._y = label.values
         self._x,self._z = np.split(dataset,[len(self._y)])
