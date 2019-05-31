@@ -125,7 +125,7 @@ class Kabu:
             before.values.flatten().reshape(-1,1),
             #scaler.fit_transform(before.values.flatten().reshape(-1,1)),
             [len(before.index), self._config['term'], len(self._data.columns)])
-        label = self._rule2(after)
+        label = self._rule1(after)
         dataset2 = np.reshape(
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
             #scaler.fit_transform(before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1)),
