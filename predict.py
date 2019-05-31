@@ -82,7 +82,7 @@ class Kabu:
         nums, bins = pd.qcut(diff,counts,labels=range(counts),retbins=True)
         output = to_categorical(nums)
         output = pd.DataFrame(output,index=data.index)
-        print(bins*100.)
+        print((1.-bins)*100.)
         #print((np.exp(bins)-1.)*100.)
         return output
 
