@@ -177,7 +177,7 @@ class Kabu:
         dense_2 = Dense(
             len(self._y[0]),
             kernel_initializer='glorot_uniform')(dense_1)
-        output = Activation('softmax')(dense_2)
+        output = Activation('softmax')(dense_1)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
