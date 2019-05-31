@@ -151,10 +151,10 @@ class Kabu:
             return_sequences=True,
             input_shape=(days, dimension),
             activation='relu'))(drop_a1)
-        drop_a2 = Dropout(.9995)(lstm_a2)
+        drop_a2 = Dropout(.9995)(lstm_a1)
         lstm_a2 = Bidirectional(GRU(
             self._ml['hidden'],
-        ))(lstm_a1)
+        ))(drop_a2)
         drop_a2 = Dropout(.9995)(lstm_a2)
 
         input_wav = Input(shape=(dimension,days))
@@ -170,7 +170,7 @@ class Kabu:
         drop_b2 = Dropout(.9995)(lstm_b1)
         lstm_b2 = Bidirectional(GRU(
             self._ml['hidden'],
-        ))(lstm_b)
+        ))(drop_b2)
         drop_b2 = Dropout(.9995)(lstm_b2)
 
         merged = Concatenate()([drop_a2,drop_b2])
