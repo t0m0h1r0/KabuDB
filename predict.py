@@ -156,7 +156,6 @@ class Kabu:
             self._ml['hidden'],
         ))(lstm_a1)
         drop_a2 = Dropout(.9995)(lstm_a2)
-        #drop_a2 = Dropout(.5)(lstm_a)
 
         input_wav = Input(shape=(dimension,days))
         drop_b1 = Dropout(.2)(input_wav)
@@ -173,7 +172,6 @@ class Kabu:
             self._ml['hidden'],
         ))(lstm_b)
         drop_b2 = Dropout(.9995)(lstm_b2)
-        #drop_b2 = Dropout(.5)(lstm_b)
 
         merged = Concatenate()([drop_a2,drop_b2])
         dense_2 = Dense(
