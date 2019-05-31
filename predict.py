@@ -86,27 +86,6 @@ class Kabu:
         #print((np.exp(bins)-1.)*100.)
         return output
 
-    def _rule3(self,data):
-        counts=3
-        output = []
-        for k in data.index:
-            #翌日購入,翌々日売却
-            buy = data.at[k,(1,'Open')]
-            category = np.zeros(counts)
-            for x in range(2,self._config['keep']):
-                if data.at[k,(x,'Low')] - buy  < np.log(1.-.03):
-                    category[2]=1.
-                    break
-                elif data.at[k,(x,'Open')] - buy >= np.log(1.+.05):
-                    category[1]=1.
-                    break
-            else:
-                category[0]=1.
-            output.append(category)
-
-        output = pd.DataFrame(output,index=data.index)
-        return output
-
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
