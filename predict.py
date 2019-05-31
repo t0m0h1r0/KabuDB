@@ -86,7 +86,7 @@ class Kabu:
 
     def _rule3(self,data):
         diff = []
-        output = data.loc[(k,slice(None))]
+        output = data.loc[(1,slice(None))]
         #print((np.exp(bins)-1.)*100.)
         return output
 
@@ -136,11 +136,11 @@ class Kabu:
             return_sequences=True,
             input_shape=(days, dimension),
             activation='relu'))(drop_a1)
-        drop_a2 = Dropout(.9995)(lstm_a1)
+        drop_a2 = Dropout(.5)(lstm_a1)
         lstm_a2 = Bidirectional(GRU(
             self._ml['hidden'],
         ))(drop_a2)
-        drop_a2 = Dropout(.9995)(lstm_a2)
+        drop_a2 = Dropout(.5)(lstm_a2)
 
         input_wav = Input(shape=(dimension,days))
         drop_b1 = Dropout(.2)(input_wav)
@@ -152,11 +152,11 @@ class Kabu:
             return_sequences=True,
             input_shape=(dimension, days),
             activation='relu'))(drop_b1)
-        drop_b2 = Dropout(.9995)(lstm_b1)
+        drop_b2 = Dropout(.5)(lstm_b1)
         lstm_b2 = Bidirectional(GRU(
             self._ml['hidden'],
         ))(drop_b2)
-        drop_b2 = Dropout(.9995)(lstm_b2)
+        drop_b2 = Dropout(.5)(lstm_b2)
 
         merged = Concatenate()([drop_a2,drop_b2])
         dense_2 = Dense(
