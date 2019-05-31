@@ -11,6 +11,7 @@ from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, 
 from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
+from keras.utils.np_utils import to_categorical
 from sklearn.preprocessing import MinMaxScaler
 
 class Kabu:
@@ -76,31 +77,10 @@ class Kabu:
             buy = data.at[k,(1,'Open')]
             sell = data.at[k,(2,'Open')]
             diff.append(sell-buy)
-        separator = pd.qcut(diff,counts)
-        '''
-        s_diff = sorted(diff)
-        separator = [s_diff[x*int(len(data)/counts)]
-            for x in range(1,counts)]
-        '''
-        np.set_printoptions(formatter={'float': '{: 0.1f}'.format})
-        print(separator)
-        #print(100.*(np.exp(np.array(separator.value))-1.))
-
-        output = []
-        for d in diff:
-            #翌日購入,翌々日売却
-            category = np.zeros(counts)
-            for j,theta in enumerate(separator):
-                if d < theta:
-                    category[j] = 1.
-                    break
-            else:
-                category[counts-1] = 1.
-            assert sum(category)==1, '条件漏れ'
-            output.append(category)
-
+        #diff = pd.DataFrame(diff,index=data.index)
+        nums = pd.qcut(diff,counts,labels=range(counts))
+        output = to_categorical(nums)
         output = pd.DataFrame(output,index=data.index)
-
         return output
 
     def _rule3(self,data):
