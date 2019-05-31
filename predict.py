@@ -74,9 +74,9 @@ class Kabu:
     def _rule1(self,data):
         diff = []
         borders = np.concatenate(
-            [-float('inf'),
+            [[-float('inf')],
             self._config['category'],
-            float('inf')])
+            [float('inf')]])
         for k in data.index:
             #翌日購入,翌々日売却
             buy = data.at[k,(1,'Open')]
