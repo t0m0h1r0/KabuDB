@@ -75,7 +75,7 @@ class Kabu:
         diff = []
         borders = np.concatenate(
             [-float('inf')],
-            list(self._config['category'])
+            list(self._config['category']),
             [float('inf')])
         for k in data.index:
             #翌日購入,翌々日売却
