@@ -71,13 +71,32 @@ class Kabu:
         output = pd.DataFrame(output,index=data.index)
         return output
 
+    def _rule1(self,data):
+        diff = []
+        borders = np.concatenate(
+            [-float('inf')],
+            list(self._config['category'])
+            [float('inf')])
+        for k in data.index:
+            #翌日購入,翌々日売却
+            buy = data.at[k,(1,'Open')]
+            sell = data.at[k,(2,'Open')]
+            diff.append(sell/buy-1.)
+            #diff.append(sell-buy)
+        nums, bins = pd.qcut(diff, borders, labels=range(len(borders)-1),retbins=True)
+        output = to_categorical(nums)
+        output = pd.DataFrame(output,index=data.index)
+        print((1.-bins)*100.)
+        #print((np.exp(bins)-1.)*100.)
+        return output
+
     def _rule2(self,data,counts=6):
         diff = []
         for k in data.index:
             #翌日購入,翌々日売却
             buy = data.at[k,(1,'Open')]
             sell = data.at[k,(2,'Open')]
-            diff.append(1.-sell/buy)
+            diff.append(sell/buy-1.)
             #diff.append(sell-buy)
         nums, bins = pd.qcut(diff,counts,labels=range(counts),retbins=True)
         output = to_categorical(nums)
