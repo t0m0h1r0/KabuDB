@@ -179,7 +179,7 @@ class Kabu:
         merged = Concatenate()([drop_a2,drop_b2])
         dense_2 = Dense(
             len(self._y[0]),
-            kernel_initializer='glorot_uniform')(dense_1)
+            kernel_initializer='glorot_uniform')(merged)
         output = Activation('softmax')(dense_2)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
