@@ -20,7 +20,7 @@ class Kabu:
         self._filename = filename
         self._config = {
             'days':4000,
-            'keep':25,
+            'keep':2,
             'term':64,
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
@@ -163,7 +163,8 @@ class Kabu:
         dense_2 = Dense(
             len(self._y[0]),
             kernel_initializer='glorot_uniform')(merged)
-        output = Activation('softmax')(dense_2)
+        output = Activation('relu')(dense_2)
+        #output = Activation('softmax')(dense_2)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
