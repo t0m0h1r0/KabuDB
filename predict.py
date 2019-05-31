@@ -37,7 +37,8 @@ class Kabu:
         #self._data = self._data[self._data.Volume>0.]
         self._data = self._data.drop('Volume',axis=1)
         self._data = self._data.dropna(how='any')
-        self._data = np.log(self._data)[-self._config['days']:]
+        self._data = self._data[-self._config['days']:]
+        #self._data = np.log(self._data)[-self._config['days']:]
 
     def _save(self):
         with open(self._filename+'.json','w') as f:
@@ -76,11 +77,13 @@ class Kabu:
             #翌日購入,翌々日売却
             buy = data.at[k,(1,'Open')]
             sell = data.at[k,(2,'Open')]
-            diff.append(sell-buy)
+            diff.append(sell/buy)
+            #diff.append(sell-buy)
         nums, bins = pd.qcut(diff,counts,labels=range(counts),retbins=True)
         output = to_categorical(nums)
         output = pd.DataFrame(output,index=data.index)
-        print((np.exp(bins)-1.)*100.)
+        print(bins*100.)
+        #print((np.exp(bins)-1.)*100.)
         return output
 
     def _rule3(self,data):
@@ -176,7 +179,7 @@ class Kabu:
         merged = Concatenate()([drop_a2,drop_b2])
         dense_2 = Dense(
             len(self._y[0]),
-            kernel_initializer='glorot_uniform')(merged)
+            kernel_initializer='glorot_uniform')(dense_1)
         output = Activation('softmax')(dense_2)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
