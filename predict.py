@@ -50,27 +50,6 @@ class Kabu:
             self._model = model_from_json(f.read())
         self._model.load_weights(self._filename+'.hdf5')
 
-    def _rule(self,data):
-
-        output = []
-        for k in data.index:
-            #翌日購入,翌々日売却
-            buy = data.at[k,(1,'Open')]
-            sell = data.at[k,(2,'Open')]
-            category = np.zeros(len(self._config['category'])+1)
-
-            for j,theta in enumerate(self._config['category']):
-                if sell - buy < np.log(1+theta):
-                    category[j] = 1.
-                    break
-            else:
-                category[len(self._config['category'])] = 1.
-            assert sum(category)==1, '条件漏れ'
-            output.append(category)
-
-        output = pd.DataFrame(output,index=data.index)
-        return output
-
     def _rule1(self,data):
         diff = []
         borders = np.concatenate(
