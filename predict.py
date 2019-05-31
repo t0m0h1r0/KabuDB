@@ -84,6 +84,12 @@ class Kabu:
         #print((np.exp(bins)-1.)*100.)
         return output
 
+    def _rule3(self,data):
+        diff = []
+        output = data.loc[(k,slice(None))]
+        #print((np.exp(bins)-1.)*100.)
+        return output
+
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
@@ -104,7 +110,7 @@ class Kabu:
             before.values.flatten().reshape(-1,1),
             #scaler.fit_transform(before.values.flatten().reshape(-1,1)),
             [len(before.index), self._config['term'], len(self._data.columns)])
-        label = self._rule1(after)
+        label = self._rule3(after)
         dataset2 = np.reshape(
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
             #scaler.fit_transform(before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1)),
@@ -161,7 +167,8 @@ class Kabu:
         model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
-        model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+        model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
+        #model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         self._model = model
 
     def _calculate(self):
