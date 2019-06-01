@@ -191,6 +191,7 @@ class Kabu:
         ans = list(zip(self._y,ans))
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',np.dot(input,output))
+        print(self._wz)
 
 if __name__ == '__main__':
     import argparse as ap
