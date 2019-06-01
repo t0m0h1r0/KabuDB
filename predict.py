@@ -136,7 +136,7 @@ class Kabu:
             use_bias=True,
             return_sequences=False,
             #return_sequences=True,
-            input_shape=(days, dimension),
+            input_shape=(dimension, days),
             activation='relu'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
         '''
