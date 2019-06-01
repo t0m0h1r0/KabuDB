@@ -90,7 +90,6 @@ class Kabu:
 
     def _rule3(self,data):
         output = data.loc[:,(1,slice(None))].sort_index(axis=1,level=(1,0))
-        print(output)
         return output
 
     def _generate(self):
@@ -123,7 +122,6 @@ class Kabu:
 
         self._y = label.values
         self._x,self._z = np.split(dataset,[len(self._y)])
-        print(self._y)
         self._wx,self._wz = np.split(wave,[len(self._y)])
 
     def _build(self):
