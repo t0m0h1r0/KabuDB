@@ -159,7 +159,8 @@ class Kabu:
         #output = Activation('softmax')(dense_2)
 
         #model = Model(inputs=input_raw,outputs=output)
-        model = Model(inputs=[input_raw,input_wav],outputs=output)
+        model = Model(inputs=input_wav,outputs=output)
+        #model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
@@ -179,7 +180,8 @@ class Kabu:
 
     def _predict(self):
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
-        ans = self._model.predict([self._z,self._wz])
+        ans = self._model.predict([self._wz])
+        #ans = self._model.predict([self._z,self._wz])
         print(np.round(ans,decimals=2))
 
     def _validate(self):
