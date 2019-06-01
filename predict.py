@@ -117,6 +117,7 @@ class Kabu:
             [len(before.index), len(self._data.columns), self._config['term']])
         #離散フーリエ変換
         wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
+        print(wave)
 
         self._y = label.values
         self._x,self._z = np.split(dataset,[len(self._y)])
@@ -191,7 +192,6 @@ class Kabu:
         ans = list(zip(self._y,ans))
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',np.dot(input,output))
-        print(self._wz)
 
 if __name__ == '__main__':
     import argparse as ap
