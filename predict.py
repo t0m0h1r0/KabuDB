@@ -170,7 +170,7 @@ class Kabu:
     def _calculate(self):
         early_stopping = EarlyStopping(patience=5, verbose=1)
         self._model.fit(
-            self._x, self._y,
+            self._wx, self._y,
             #[self._x,self._wx], self._y,
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
