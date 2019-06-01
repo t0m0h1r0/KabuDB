@@ -158,8 +158,8 @@ class Kabu:
         output = Activation('relu')(dense_2)
         #output = Activation('softmax')(dense_2)
 
-        model = Model(inputs=input_raw,outputs=output)
-        #model = Model(inputs=[input_raw,input_wav],outputs=output)
+        #model = Model(inputs=input_raw,outputs=output)
+        model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
