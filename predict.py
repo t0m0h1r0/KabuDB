@@ -19,7 +19,7 @@ class Kabu:
         self._data =[]
         self._filename = filename
         self._config = {
-            'days':800,
+            'days':4000,
             'keep':2,
             'term':128,
             #'category':(-.3,.0,+.3)
