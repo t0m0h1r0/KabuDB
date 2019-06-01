@@ -110,7 +110,7 @@ class Kabu:
         dataset = np.reshape(
             before.values.flatten().reshape(-1,1),
             #scaler.fit_transform(before.values.flatten().reshape(-1,1)),
-            [len(before.index), self._config['term'], len(self._data.columns)])
+            [len(before.index), len(self._data.columns), self._config['term']])
         label = self._rule3(after)
         dataset2 = np.reshape(
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
@@ -171,7 +171,7 @@ class Kabu:
         self._model = model
 
     def _calculate(self):
-        early_stopping = EarlyStopping(patience=5, verbose=1)
+        early_stopping = EarlyStopping(patience=10, verbose=1)
         self._model.fit(
             [self._x], self._y,
             #[self._x,self._wx], self._y,
