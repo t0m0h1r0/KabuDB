@@ -140,7 +140,7 @@ class Kabu:
         lstm_a2 = Bidirectional(GRU(
             self._ml['hidden'],
         ))(drop_a2)
-        drop_a2 = Dropout(.5)(lstm_a2)
+        drop_a2 = Dropout(.5)(lstm_a1)
 
         input_wav = Input(shape=(dimension,days))
         drop_b1 = Dropout(.2)(input_wav)
