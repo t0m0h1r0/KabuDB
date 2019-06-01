@@ -110,7 +110,8 @@ class Kabu:
         dataset = np.reshape(
             before.values.flatten().reshape(-1,1),
             #scaler.fit_transform(before.values.flatten().reshape(-1,1)),
-            [len(before.index), len(self._data.columns), self._config['term']])
+            [len(before.index), self._config['term'], len(self._data.columns)])
+            #[len(before.index), len(self._data.columns), self._config['term']])
         label = self._rule3(after)
         dataset2 = np.reshape(
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
@@ -129,14 +130,14 @@ class Kabu:
         days = self._config['term']
         dimension = len(self._data.columns)
 
-        input_raw = Input(shape=(days,dimension))
+        input_raw = Input(shape=(dimension,days))
         drop_a1 = Dropout(.2)(input_raw)
         lstm_a1 = Bidirectional(GRU(
             self._ml['hidden'],
             use_bias=True,
             return_sequences=False,
             #return_sequences=True,
-            input_shape=(dimension, days),
+            input_shape=(days, dimension),
             activation='relu'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
         '''
