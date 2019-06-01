@@ -111,6 +111,7 @@ class Kabu:
         #無駄な処理だが、Pandasを維持するため、NumPyにする直前でMinMax
         #1次元にするとMinMaxできないので、二次元化する
         dataset = np.reshape(
+            print(before.sort_index(axis=1,level=(1,0)))
             before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
             #scaler.fit_transform(before.values.flatten().reshape(-1,1)),
             #[len(before.index), self._config['term'], len(self._data.columns)])
