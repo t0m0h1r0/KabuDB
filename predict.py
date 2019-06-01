@@ -170,7 +170,7 @@ class Kabu:
     def _calculate(self):
         early_stopping = EarlyStopping(patience=5, verbose=1)
         self._model.fit(
-            self._wx, self._y,
+            self._x, self._y,
             #[self._x,self._wx], self._y,
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
@@ -186,7 +186,8 @@ class Kabu:
 
     def _validate(self):
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
-        ans = self._model.predict([self._x,self._wx])
+        ans = self._model.predict([self._wx])
+        #ans = self._model.predict([self._x,self._wx])
         ans = list(zip(self._y,ans))
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',np.dot(input,output))
