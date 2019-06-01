@@ -117,7 +117,7 @@ class Kabu:
             [len(before.index), len(self._data.columns), self._config['term']])
         #離散フーリエ変換
         wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
-        print(wave)
+        #print(wave)
 
         self._y = label.values
         self._x,self._z = np.split(dataset,[len(self._y)])
@@ -138,14 +138,6 @@ class Kabu:
             input_shape=(days, dimension),
             activation='tanh'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
-        lstm_a2 = Bidirectional(GRU(
-        #lstm_a = Bidirectional(LSTM(
-            self._ml['hidden'],
-            return_sequences=False,
-            input_shape=(days, dimension),
-            activation='relu'))(drop_a1)
-        drop_a2 = Dropout(.5)(lstm_a2)
-
         '''
         input_wav = Input(shape=(dimension,days))
         drop_b1 = Dropout(.2)(input_wav)
@@ -161,7 +153,7 @@ class Kabu:
 
         merged = Concatenate()([drop_a1,drop_b1])
         '''
-        merged = drop_a2
+        merged = drop_a1
         dense_2 = Dense(
             len(self._y[0]),
             kernel_initializer='glorot_uniform')(merged)
