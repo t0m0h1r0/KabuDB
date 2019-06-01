@@ -20,7 +20,7 @@ class Kabu:
         self._filename = filename
         self._config = {
             'days':4000,
-            'keep':2,
+            'keep':3,
             'term':128,
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
@@ -35,10 +35,12 @@ class Kabu:
     def _read(self):
         self._data = pd.read_csv(self._filename,index_col=0)
         self._data = self._data.drop('Volume',axis=1)
+        '''
         self._data = self._data.drop('Close',axis=1)
         self._data = self._data.drop('High',axis=1)
         self._data = self._data.drop('Low',axis=1)
         self._data = self._data.drop('Adj Close',axis=1)
+        '''
         self._data = self._data.dropna(how='any')
         self._data = self._data[-self._config['days']:]
         #self._data = np.log(self._data)[-self._config['days']:]
