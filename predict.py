@@ -20,7 +20,7 @@ class Kabu:
         self._filename = filename
         self._config = {
             'days':4000,
-            'keep':1,
+            'keep':2,
             'term':64,
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
@@ -85,7 +85,6 @@ class Kabu:
         return output
 
     def _rule3(self,data):
-        diff = []
         output = data.loc[:,(1,slice(None))]
         print(output)
         return output
@@ -99,7 +98,7 @@ class Kabu:
         before = pd.concat([self._data.shift(+k) for k in range(term)], axis=1, keys=range(term))
         before = before.dropna(how='any')
 
-        #翌日からkeep日間のデータを横に並べる
+        #当日からkeep日間のデータを横に並べる
         after = pd.concat([self._data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
         after = after.dropna(how='any')
         after = after[after.index.isin(before.index)]
