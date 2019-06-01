@@ -158,7 +158,7 @@ class Kabu:
         ))(drop_b2)
         drop_b2 = Dropout(.5)(lstm_b2)
 
-        merged = Concatenate()([drop_a2,drop_b2])
+        #merged = Concatenate()([drop_a2,drop_b2])
         merged = drop_a2
         dense_2 = Dense(
             len(self._y[0]),
