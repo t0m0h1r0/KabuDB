@@ -86,7 +86,6 @@ class Kabu:
 
     def _rule3(self,data):
         output = data.loc[:,(1,slice(None))]
-        print(output)
         return output
 
     def _generate(self):
