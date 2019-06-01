@@ -128,8 +128,8 @@ class Kabu:
 
         input_raw = Input(shape=(days,dimension))
         drop_a1 = Dropout(.2)(input_raw)
-        lstm_a1 = Bidirectional(GRU(
-        #lstm_a = Bidirectional(LSTM(
+        #lstm_a1 = Bidirectional(GRU(
+        lstm_a1 = Bidirectional(LSTM(
             self._ml['hidden'],
             use_bias=True,
             return_sequences=False,
