@@ -152,7 +152,7 @@ class Kabu:
         drop_b1 = Dropout(.5)(lstm_b1)
 
         merged = Concatenate()([drop_a1,drop_b1])
-        merged = drop_b1
+        merged = drop_a1
         dense_2 = Dense(
             len(self._y[0]),
             kernel_initializer='glorot_uniform')(merged)
@@ -160,7 +160,7 @@ class Kabu:
         #output = Activation('softmax')(dense_2)
 
         #model = Model(inputs=input_raw,outputs=output)
-        model = Model(inputs=[input_wav],outputs=output)
+        model = Model(inputs=[input_raw],outputs=output)
         #model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
@@ -171,7 +171,7 @@ class Kabu:
     def _calculate(self):
         early_stopping = EarlyStopping(patience=5, verbose=1)
         self._model.fit(
-            [self._wx], self._y,
+            [self._x], self._y,
             #[self._x,self._wx], self._y,
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
@@ -181,13 +181,13 @@ class Kabu:
 
     def _predict(self):
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
-        ans = self._model.predict([self._wz])
+        ans = self._model.predict([self._z])
         #ans = self._model.predict([self._z,self._wz])
         print(np.round(ans,decimals=2))
 
     def _validate(self):
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
-        ans = self._model.predict([self._wx])
+        ans = self._model.predict([self._x])
         #ans = self._model.predict([self._x,self._wx])
         ans = list(zip(self._y,ans))
         for input,output in np.round(ans,decimals=2):
