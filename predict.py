@@ -117,7 +117,7 @@ class Kabu:
         wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
         #print(wave)
 
-        self._y = label.values
+        self._y = np.log(label.values)
         self._x,self._z = np.split(np.log(dataset),[len(self._y)])
         print(self._x)
         self._wx,self._wz = np.split(wave,[len(self._y)])
