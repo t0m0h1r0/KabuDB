@@ -12,7 +12,6 @@ from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
-from sklearn.preprocessing import MinMaxScaler
 
 class Kabu:
     def __init__(self,filename='^N225.csv'):
@@ -97,7 +96,6 @@ class Kabu:
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
-        scaler = MinMaxScaler(feature_range=(0, 1))
 
         #当日を含めてterm日間のデータを横に並べる
         before = pd.concat([self._data.shift(+k) for k in range(term)], axis=1, keys=range(term))
@@ -113,13 +111,11 @@ class Kabu:
         print(before.sort_index(axis=1,level=(1,0)))
         dataset = np.reshape(
             before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
-            #scaler.fit_transform(before.values.flatten().reshape(-1,1)),
             #[len(before.index), self._config['term'], len(self._data.columns)])
             [len(before.index), len(self._data.columns), self._config['term']])
         label = self._rule3(after)
         dataset2 = np.reshape(
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
-            #scaler.fit_transform(before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1)),
             [len(before.index), len(self._data.columns), self._config['term']])
         #離散フーリエ変換
         wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
