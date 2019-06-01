@@ -166,7 +166,8 @@ class Kabu:
         output = Activation('relu')(dense_2)
         #output = Activation('softmax')(dense_2)
 
-        model = Model(inputs=[input_raw,input_wav],outputs=output)
+        model = Model(inputs=input_raw,outputs=output)
+        #model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
@@ -176,7 +177,8 @@ class Kabu:
     def _calculate(self):
         early_stopping = EarlyStopping(patience=5, verbose=1)
         self._model.fit(
-            [self._x,self._wx], self._y,
+            self._x, self._y,
+            #[self._x,self._wx], self._y,
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
             validation_split=0.2,
