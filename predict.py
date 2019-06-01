@@ -133,8 +133,8 @@ class Kabu:
         #lstm_a = Bidirectional(LSTM(
             self._ml['hidden'],
             use_bias=True,
-            #return_sequences=False,
-            return_sequences=True,
+            return_sequences=False,
+            #return_sequences=True,
             input_shape=(days, dimension),
             activation='tanh'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
