@@ -87,7 +87,7 @@ class Kabu:
     def _rule3(self,data):
         diff = []
         output = data.loc[:,(1,slice(None))]
-        #print((np.exp(bins)-1.)*100.)
+        print(output)
         return output
 
     def _generate(self):
