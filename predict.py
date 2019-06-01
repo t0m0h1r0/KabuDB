@@ -137,10 +137,14 @@ class Kabu:
         lstm_a1 = Bidirectional(GRU(
             self._ml['hidden'],
             use_bias=True,
-            return_sequences=False,
-            #return_sequences=True,
+            #return_sequences=False,
+            return_sequences=True,
             input_shape=(dimension, days),
             activation='tanh'))(drop_a1)
+        drop_a1 = Dropout(.5)(lstm_a1)
+        lstm_a1 = Bidirectional(GRU(
+            self._ml['hidden'],
+            activation='relu'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
         '''
         input_wav = Input(shape=(dimension,days))
@@ -174,7 +178,7 @@ class Kabu:
         self._model = model
 
     def _calculate(self):
-        early_stopping = EarlyStopping(patience=10, verbose=1)
+        early_stopping = EarlyStopping(patience=20, verbose=1)
         self._model.fit(
             [self._x], self._y,
             #[self._x,self._wx], self._y,
