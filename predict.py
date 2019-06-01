@@ -118,7 +118,7 @@ class Kabu:
         #print(wave)
 
         self._y = label.values
-        print(self._y)
+        print(self._x)
         self._x,self._z = np.split(dataset,[len(self._y)])
         self._wx,self._wz = np.split(wave,[len(self._y)])
 
