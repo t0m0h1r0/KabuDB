@@ -136,7 +136,7 @@ class Kabu:
             #return_sequences=True,
             input_shape=(days, dimension),
             activation='tanh'))(drop_a1)
-        drop_a1 = Dropout(.5)(lstm_a1)
+        drop_a1 = Dropout(.995)(lstm_a1)
         '''
         input_wav = Input(shape=(dimension,days))
         drop_b1 = Dropout(.2)(input_wav)
