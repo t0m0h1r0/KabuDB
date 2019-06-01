@@ -20,8 +20,8 @@ class Kabu:
         self._filename = filename
         self._config = {
             'days':4000,
-            'keep':2,
-            'term':64,
+            'keep':1,
+            'term':128,
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
