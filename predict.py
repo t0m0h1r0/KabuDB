@@ -21,11 +21,11 @@ class Kabu:
         self._config = {
             'days':4000,
             'keep':1,
-            'term':128,
+            'term':64,
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
-        self._ml = {'hidden':500,'epoch':200,'batch':64}
+        self._ml = {'hidden':500,'epoch':500,'batch':128}
         self._x = []
         self._y = []
         self._z = []
