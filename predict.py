@@ -210,9 +210,9 @@ class Kabu:
     def _validate(self):
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
         ans = self._model.predict([self._x])
+        ans = self._scaler.inverse_transform(ans)
         #ans = self._model.predict([self._x,self._wx])
         ans = list(zip(self._y,ans))
-        ans = self._scaler.inverse_transform(ans)
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',np.dot(input,output))
 
