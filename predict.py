@@ -191,14 +191,12 @@ class Kabu:
             callbacks=[early_stopping])
 
     def _predict(self):
-        np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
         ans = self._model.predict([self._z])
         ans = self._scaler.inverse_transform(ans)
         #ans = self._model.predict([self._z,self._wz])
         print(np.round(ans,decimals=2))
 
     def _validate(self):
-        np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
         ans = self._model.predict([self._x])
         ans = self._scaler.inverse_transform(ans)
         cal = self._scaler.inverse_transform(self._y)
