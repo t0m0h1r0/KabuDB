@@ -130,7 +130,7 @@ class Kabu:
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
-        #wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
+        wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
         #print(wave)
 
         self._y = label.values
