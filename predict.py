@@ -10,7 +10,7 @@ np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
 from keras.models import Sequential, model_from_json, load_model, Model
 from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, Input, Multiply, Concatenate
 from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
 from keras.utils.training_utils import multi_gpu_model
@@ -164,7 +164,8 @@ class Kabu:
         #model = Model(inputs=input_raw,outputs=output)
         model = Model(inputs=[input_raw],outputs=output)
         #model = Model(inputs=[input_raw,input_wav],outputs=output)
-        optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
+        #optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
+        optimizer = RMSprop()
 
         self._model_for_save = model
         if gpus>1:
