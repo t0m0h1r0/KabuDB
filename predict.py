@@ -211,8 +211,9 @@ class Kabu:
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
         ans = self._model.predict([self._x])
         ans = self._scaler.inverse_transform(ans)
+        cal = self._scaler.inverse_transform(self._y)
         #ans = self._model.predict([self._x,self._wx])
-        ans = list(zip(self._y,ans))
+        ans = list(zip(cal,ans))
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',np.dot(input,output))
 
