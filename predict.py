@@ -28,7 +28,7 @@ class Kabu:
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
-        self._ml = {'hidden':100,'epoch':5000,'batch':1024}
+        self._ml = {'hidden':200,'epoch':5000,'batch':16}
         self._x = []
         self._y = []
         self._z = []
@@ -150,11 +150,11 @@ class Kabu:
             return_sequences=True,
             input_shape=(dimension, days),
             activation='tanh'))(drop_a1)
-        drop_a1 = Dropout(.5)(lstm_a1)
+        drop_a1 = Dropout(.95)(lstm_a1)
         lstm_a1 = Bidirectional(GRU(
             self._ml['hidden'],
             activation='relu'))(drop_a1)
-        drop_a1 = Dropout(.5)(lstm_a1)
+        drop_a1 = Dropout(.95)(lstm_a1)
         '''
         input_wav = Input(shape=(dimension,days))
         drop_b1 = Dropout(.2)(input_wav)
