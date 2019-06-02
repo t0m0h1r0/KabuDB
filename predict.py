@@ -38,6 +38,7 @@ class Kabu:
     def _read(self):
         self._data = pd.read_csv(self._filename,index_col=0)
         self._data = self._data.drop('Volume',axis=1)
+        self._data = self._data.drop('Adj Close',axis=1)
         '''
         self._data = self._data.drop('Close',axis=1)
         self._data = self._data.drop('High',axis=1)
@@ -197,6 +198,7 @@ class Kabu:
         ans = self._scaler.inverse_transform(ans)
         #ans = self._model.predict([self._z,self._wz])
         print(np.round(ans,decimals=2))
+        return ans
 
     def _validate(self):
         ans = self._model.predict([self._x])
