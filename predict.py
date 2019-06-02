@@ -241,7 +241,7 @@ if __name__ == '__main__':
     elif(args.learn):
         a._generate()
         a._build(gpus=args.gpus)
-        a._model.summary()
+        a._model_for_save.summary()
         a._calculate()
         a._predict()
         a._save()
