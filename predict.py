@@ -7,7 +7,7 @@ import scipy as sp
 import scipy.fftpack
 np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
 
-from keras.models import Sequential, model_from_json, Model
+from keras.models import Sequential, model_from_json, load_model, Model
 from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, Input, Multiply, Concatenate
 from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
 from keras.optimizers import Adam
@@ -55,7 +55,7 @@ class Kabu:
         self._model_for_save.save(self._filename+'.h5')
 
     def _load(self):
-        self._model.load_model(self._filename+'.h5')
+        self._model = load_model(self._filename+'.h5')
         '''
         with open(self._filename+'.json','r') as f:
             self._model = model_from_json(f.read())
