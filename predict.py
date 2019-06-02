@@ -146,6 +146,7 @@ class Kabu:
             self._ml['hidden'],
             #use_bias=True,
             return_sequences=False,
+            batch_input_shape=(self._ml['batch'],days,dimension),
             #return_sequences=True,
             #input_shape=(days, dimension),
             activation='relu'))(input_raw)
@@ -169,10 +170,10 @@ class Kabu:
         dense_2 = Dense(
             100,
             activation='relu')(merged)
-        dense_2 = Dense(
+        dense_3 = Dense(
             len(self._y[0]),
-            kernel_initializer='he_normal')(merged)
-        output = Activation('sigmoid')(dense_2)
+            kernel_initializer='he_normal')(dense_2)
+        output = Activation('sigmoid')(dense_3)
         #output = Activation('softmax')(dense_2)
 
         #model = Model(inputs=input_raw,outputs=output)
