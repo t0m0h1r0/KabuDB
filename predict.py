@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 import scipy.fftpack
+np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
 
 from keras.models import Sequential, model_from_json, Model
 from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, Input, Multiply, Concatenate
@@ -12,6 +13,8 @@ from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
+
+from sklearn.preprocessing import MinMaxScaler
 
 class Kabu:
     def __init__(self,filename='^N225.csv'):
@@ -95,27 +98,31 @@ class Kabu:
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        #data = self._data
+        data = pd.DataFrame(scaler.fit_transform(self._data.values),index=self._data.index)
 
         #当日を含めてterm日間のデータを横に並べる
-        before = pd.concat([self._data.shift(+k) for k in range(term)], axis=1, keys=range(term))
+        before = pd.concat([data.shift(+k) for k in range(term)], axis=1, keys=range(term))
         before = before.dropna(how='any')
+        before = before.sort_index(axis=1, level=(0,1))
 
         #当日からkeep日間のデータを横に並べる
         after = pd.concat([self._data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
         after = after.dropna(how='any')
+        after = after.sort_index(axis=1, level=(0,1))
         after = after[after.index.isin(before.index)]
 
         #無駄な処理だが、Pandasを維持するため、NumPyにする直前でMinMax
         #1次元にするとMinMaxできないので、二次元化する
-        print(before.sort_index(axis=1,level=(1,0)))
         dataset = np.reshape(
-            before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
-            #[len(before.index), self._config['term'], len(self._data.columns)])
-            [len(before.index), len(self._data.columns), self._config['term']])
+            before.values.flatten().reshape(-1,1),
+            [len(before.index), self._config['term'], len(data.columns)])
+            #[len(before.index), len(self._data.columns), self._config['term']])
         label = self._rule3(after)
         dataset2 = np.reshape(
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
-            [len(before.index), len(self._data.columns), self._config['term']])
+            [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
         wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
         #print(wave)
@@ -128,7 +135,7 @@ class Kabu:
         days = self._config['term']
         dimension = len(self._data.columns)
 
-        input_raw = Input(shape=(dimension,days))
+        input_raw = Input(shape=(days,dimension))
         drop_a1 = Dropout(.2)(input_raw)
         lstm_a1 = Bidirectional(GRU(
             self._ml['hidden'],
