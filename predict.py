@@ -132,7 +132,7 @@ class Kabu:
         self._x,self._z = np.split(dataset,[len(self._y)])
         self._wx,self._wz = np.split(wave,[len(self._y)])
 
-    def _build(self):
+    def _build(self,gpus=1):
         days = self._config['term']
         dimension = len(self._data.columns)
 
@@ -176,6 +176,8 @@ class Kabu:
         model = Model(inputs=[input_raw],outputs=output)
         #model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
+        if gpus>1:
+            model = multi_gpu_model(model,gpus=gpus)
 
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         #model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
@@ -225,10 +227,8 @@ if __name__ == '__main__':
         plot_model(a._model, to_file='model.png')
     elif(args.learn):
         a._generate()
-        a._build()
+        a._build(gpus=args.gpus)
         a._model.summary()
-        if args.gpus >1:
-            a._model = multi_gpu_model(a._model,gpus=args.gpus)
         a._calculate()
         a._predict()
         a._save()
