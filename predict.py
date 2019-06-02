@@ -97,8 +97,8 @@ class Kabu:
         return output
 
     def _rule3(self,data):
+        print(data)
         output = data.sort_index(axis=1,level=(0,1)).loc[:,(1,slice(None))]
-        print(output)
         return output
 
     def _generate(self):
