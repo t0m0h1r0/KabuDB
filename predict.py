@@ -145,7 +145,7 @@ class Kabu:
         drop_a1 = Dropout(.2)(input_raw)
         lstm_a1 = Bidirectional(GRU(
             self._ml['hidden'],
-            use_bias=True,
+            #use_bias=True,
             #return_sequences=False,
             return_sequences=True,
             input_shape=(dimension, days),
