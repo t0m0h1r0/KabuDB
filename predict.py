@@ -173,7 +173,7 @@ class Kabu:
         merged = drop_a1
         dense_2 = Dense(
             len(self._y[0]),
-            kernel_initializer='glorot_uniform')(merged)
+            kernel_initializer='he_normal')(merged)
         output = Activation('relu')(dense_2)
         #output = Activation('softmax')(dense_2)
 
