@@ -4,6 +4,7 @@
 /.DS_Store
 /*.json
 /*.hdf5
+/*.h5
 /*.png
 /*.csv
 
