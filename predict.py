@@ -147,29 +147,15 @@ class Kabu:
             #use_bias=True,
             return_sequences=False,
             batch_input_shape=(self._ml['batch'],days,dimension),
+            kernel_initializer='he_normal',
+            stateful=True,
             #return_sequences=True,
             #input_shape=(days, dimension),
             activation='relu'))(input_raw)
         drop_a1 = Dropout(.5)(lstm_a1)
-        '''
-        input_wav = Input(shape=(dimension,days))
-        drop_b1 = Dropout(.2)(input_wav)
-        lstm_b1 = Bidirectional(GRU(
-        #lstm_b = Bidirectional(LSTM(
-            self._ml['hidden'],
-            use_bias=True,
-            return_sequences=False,
-            #return_sequences=True,
-            input_shape=(dimension, days),
-            activation='relu'))(drop_b1)
-        drop_b1 = Dropout(.5)(lstm_b1)
-
-        merged = Concatenate()([drop_a1,drop_b1])
-        '''
-        merged = drop_a1
         dense_2 = Dense(
-            100,
-            activation='relu')(merged)
+            20,
+            activation='relu')(drop_a1)
         dense_3 = Dense(
             len(self._y[0]),
             kernel_initializer='he_normal')(dense_2)
