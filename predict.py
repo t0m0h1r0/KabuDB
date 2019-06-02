@@ -28,7 +28,7 @@ class Kabu:
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
-        self._ml = {'hidden':100,'epoch':5000,'batch':None}
+        self._ml = {'hidden':100,'epoch':5000,'batch':512}
         self._x = []
         self._y = []
         self._z = []
