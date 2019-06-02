@@ -28,7 +28,7 @@ class Kabu:
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
-        self._ml = {'hidden':200,'epoch':5000,'batch':64}
+        self._ml = {'hidden':50,'epoch':5000,'batch':64}
         self._x = []
         self._y = []
         self._z = []
@@ -144,13 +144,27 @@ class Kabu:
         input_raw = Input(shape=(days,dimension))
         lstm_a1 = Bidirectional(LSTM(
             self._ml['hidden'],
-            use_bias=True,
-            kernel_initializer='he_normal',
-            #stateful=True,
-            return_sequences=False,
-            #return_sequences=True,
-            #input_shape=(days, dimension),
+            #return_sequences=False,
+            dropout=.2,
+            return_sequences=True,
             activation='relu'))(input_raw)
+        lstm_a1 = Bidirectional(LSTM(
+            self._ml['hidden'],
+            #return_sequences=False,
+            dropout=.2,
+            return_sequences=True,
+            activation='relu'))(lstm_a1)
+        lstm_a1 = Bidirectional(LSTM(
+            self._ml['hidden'],
+            #return_sequences=False,
+            dropout=.2,
+            return_sequences=True,
+            activation='relu'))(lstm_a1)
+        lstm_a1 = Bidirectional(LSTM(
+            self._ml['hidden'],
+            dropout=.2,
+            return_sequences=False,
+            activation='relu'))(lstm_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
         dense_2 = Dense(
             20,
