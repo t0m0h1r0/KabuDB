@@ -152,10 +152,12 @@ class Kabu:
             input_shape=(dimension, days),
             activation='relu'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
-        lstm_a1 = Bidirectional(LSTM(
+        lstm_a1 = LSTM(
+        #lstm_a1 = Bidirectional(LSTM(
         #lstm_a1 = Bidirectional(GRU(
             self._ml['hidden'],
-            activation='relu'))(drop_a1)
+            activation='relu')(drop_a1)
+            #activation='relu'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
         '''
         input_wav = Input(shape=(dimension,days))
