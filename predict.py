@@ -13,6 +13,7 @@ from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
+from keras.utils.training_utils import multi_gpu_model
 
 from sklearn.preprocessing import MinMaxScaler
 
@@ -212,6 +213,7 @@ if __name__ == '__main__':
     parser.add_argument('-v','--visualize',action='store_true')
     parser.add_argument('-f','--csv_filename',type=str,default='^N225.csv')
     parser.add_argument('-a','--compare_all',action='store_true')
+    parser.add_argument('-g','--gpus',type=int,default=1)
     args = parser.parse_args()
 
     a=Kabu(filename=args.csv_filename)
@@ -225,6 +227,8 @@ if __name__ == '__main__':
         a._generate()
         a._build()
         a._model.summary()
+        if args.gpus >1:
+            a._model = multi_gpu_model(a._model,gpus=args.gpus)
         a._calculate()
         a._predict()
         a._save()
