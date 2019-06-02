@@ -141,23 +141,14 @@ class Kabu:
         days = self._config['term']
         dimension = len(self._data.columns)
 
-        input_raw = Input(shape=(days,dimension))
-        drop_a1 = Dropout(.2)(input_raw)
+        input_raw = Input(shape=(dimension,days))
         lstm_a1 = Bidirectional(LSTM(
-        #lstm_a1 = Bidirectional(GRU(
             self._ml['hidden'],
             #use_bias=True,
             #return_sequences=False,
             return_sequences=True,
-            input_shape=(dimension, days),
-            activation='relu'))(drop_a1)
-        drop_a1 = Dropout(.5)(lstm_a1)
-        lstm_a1 = LSTM(
-        #lstm_a1 = Bidirectional(LSTM(
-        #lstm_a1 = Bidirectional(GRU(
-            self._ml['hidden'],
-            activation='relu')(drop_a1)
-            #activation='relu'))(drop_a1)
+            #input_shape=(dimension, days),
+            activation='relu'))(input_raw)
         drop_a1 = Dropout(.5)(lstm_a1)
         '''
         input_wav = Input(shape=(dimension,days))
@@ -176,9 +167,12 @@ class Kabu:
         '''
         merged = drop_a1
         dense_2 = Dense(
+            100,
+            activation='relu')(merged)
+        dense_2 = Dense(
             len(self._y[0]),
             kernel_initializer='he_normal')(merged)
-        output = Activation('relu')(dense_2)
+        output = Activation('sigmoid')(dense_2)
         #output = Activation('softmax')(dense_2)
 
         #model = Model(inputs=input_raw,outputs=output)
