@@ -147,14 +147,14 @@ class Kabu:
             self._ml['hidden'],
             #use_bias=True,
             #return_sequences=False,
-            kernel_initializer='he_normal'
+            kernel_initializer='he_normal',
             return_sequences=True,
             input_shape=(dimension, days),
             activation='relu'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
         lstm_a1 = Bidirectional(GRU(
             self._ml['hidden'],
-            kernel_initializer='he_normal'
+            kernel_initializer='he_normal',
             activation='relu'))(drop_a1)
         drop_a1 = Dropout(.5)(lstm_a1)
         '''
