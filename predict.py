@@ -46,6 +46,7 @@ class Kabu:
         '''
         self._data = self._data.dropna(how='any')
         self._data = self._data[-self._config['days']:]
+        self._data = self._data.sort_index(axis=1)
         #self._data = np.log(self._data)[-self._config['days']:]
 
     def _save(self):
