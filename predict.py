@@ -141,7 +141,7 @@ class Kabu:
         days = self._config['term']
         dimension = len(self._data.columns)
 
-        input_raw = Input(shape=(dimension,days))
+        input_raw = Input(shape=(days,dimension))
         lstm_a1 = Bidirectional(LSTM(
             self._ml['hidden'],
             #use_bias=True,
