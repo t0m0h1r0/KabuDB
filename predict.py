@@ -130,7 +130,7 @@ class Kabu:
             before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
-        wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
+        #wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
         #print(wave)
 
         self._y = label.values
@@ -143,43 +143,34 @@ class Kabu:
 
         input_raw = Input(shape=(days,dimension))
         lstm_a1 = Bidirectional(LSTM(
-            self._ml['hidden'],
+            units= self._ml['hidden'],
             #return_sequences=False,
-            dropout=.2,
-            return_sequences=True,
-            activation='relu'))(input_raw)
+            return_sequences=True))(input_raw)
+        lstm_a1 = Dropout(0.2)(lstm_a1)
         lstm_a1 = Bidirectional(LSTM(
-            self._ml['hidden'],
+            units= self._ml['hidden'],
             #return_sequences=False,
-            dropout=.2,
-            return_sequences=True,
-            activation='relu'))(lstm_a1)
+            return_sequences=True))(lstm_a1)
+        lstm_a1 = Dropout(0.2)(lstm_a1)
         lstm_a1 = Bidirectional(LSTM(
-            self._ml['hidden'],
+            units= self._ml['hidden'],
             #return_sequences=False,
-            dropout=.2,
-            return_sequences=True,
-            activation='relu'))(lstm_a1)
+            return_sequences=True))(lstm_a1)
+        lstm_a1 = Dropout(0.2)(lstm_a1)
         lstm_a1 = Bidirectional(LSTM(
-            self._ml['hidden'],
+            units= self._ml['hidden'],
             dropout=.2,
-            return_sequences=False,
-            activation='relu'))(lstm_a1)
-        drop_a1 = Dropout(.5)(lstm_a1)
+            return_sequences=False))(lstm_a1)
+        lstm_a1 = Dropout(0.2)(lstm_a1)
         dense_2 = Dense(
-            20,
-            activation='relu')(drop_a1)
-        dense_3 = Dense(
-            len(self._y[0]),
-            kernel_initializer='he_normal')(dense_2)
-        output = Activation('sigmoid')(dense_3)
+            units= len(self._y[0]))(lstm_a1)
+        output = Activation('tanh')(dense_2)
         #output = Activation('softmax')(dense_2)
 
         #model = Model(inputs=input_raw,outputs=output)
         model = Model(inputs=[input_raw],outputs=output)
         #model = Model(inputs=[input_raw,input_wav],outputs=output)
-        #optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
-        optimizer = RMSprop()
+        optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
         self._model_for_save = model
         if gpus>1:
