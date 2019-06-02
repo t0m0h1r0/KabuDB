@@ -144,12 +144,8 @@ class Kabu:
         input_raw = Input(shape=(days,dimension))
         lstm_a1 = Bidirectional(LSTM(
             self._ml['hidden'],
-            #use_bias=True,
+            use_bias=True,
             return_sequences=False,
-<<<<<<< HEAD
-=======
-            batch_input_shape=(self._ml['batch'],days,dimension),
->>>>>>> 3d13300634b5214aeeef97d7f6ada00aaa49b0b5
             kernel_initializer='he_normal',
             stateful=True,
             #return_sequences=True,
