@@ -106,7 +106,8 @@ class Kabu:
         keep = self._config['keep']
         self._scaler = MinMaxScaler(feature_range=(0, 1))
         #data = self._data
-        data = pd.DataFrame(self._scaler.fit_transform(self._data.values),index=self._data.index)
+        data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
+            index=self._data.index, columns=self._data.columns)
 
         #当日を含めてterm日間のデータを横に並べる
         before = pd.concat([data.shift(+k) for k in range(term)], axis=1, keys=range(term))
