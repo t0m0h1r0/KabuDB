@@ -103,9 +103,9 @@ class Kabu:
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
-        scaler = MinMaxScaler(feature_range=(0, 1))
+        self._scaler = MinMaxScaler(feature_range=(0, 1))
         #data = self._data
-        data = pd.DataFrame(scaler.fit_transform(self._data.values),index=self._data.index)
+        data = pd.DataFrame(self._scaler.fit_transform(self._data.values),index=self._data.index)
 
         #当日を含めてterm日間のデータを横に並べる
         before = pd.concat([data.shift(+k) for k in range(term)], axis=1, keys=range(term))
@@ -203,6 +203,7 @@ class Kabu:
     def _predict(self):
         np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
         ans = self._model.predict([self._z])
+        ans = self._scaler.inverse_transform(ans)
         #ans = self._model.predict([self._z,self._wz])
         print(np.round(ans,decimals=2))
 
@@ -211,6 +212,7 @@ class Kabu:
         ans = self._model.predict([self._x])
         #ans = self._model.predict([self._x,self._wx])
         ans = list(zip(self._y,ans))
+        ans = self._scaler.inverse_transform(ans)
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',np.dot(input,output))
 
