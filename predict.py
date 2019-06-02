@@ -50,7 +50,7 @@ class Kabu:
 
     def _save(self):
         with open(self._filename+'.json','w') as f:
-            f.write(self._model.to_json())
+            f.write(self._model_for_save.to_json())
         self._model.save_weights(self._filename+'.hdf5')
 
     def _load(self):
@@ -177,9 +177,11 @@ class Kabu:
         model = Model(inputs=[input_raw],outputs=output)
         #model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
+
+        self._model_for_save = model
+        self._model_for_save.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         if gpus>1:
             model = multi_gpu_model(model,gpus=gpus)
-
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         #model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         self._model = model
