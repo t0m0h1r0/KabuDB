@@ -133,10 +133,11 @@ class Kabu:
         #離散フーリエ変換
         wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
         #print(wave)
-        #test
 
         self._y = label.values
-        print(self._scaler.inverse_transform(self._y))
+        np.set_printoptions(formatter={'float': '{: 0.5f}'.format})
+        print(self._y)
+        #print(self._scaler.inverse_transform(self._y))
         self._x,self._z = np.split(dataset,[len(self._y)])
         self._wx,self._wz = np.split(wave,[len(self._y)])
 
