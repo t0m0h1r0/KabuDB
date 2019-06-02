@@ -109,7 +109,8 @@ class Kabu:
         before = before.sort_index(axis=1, level=(0,1))
 
         #当日からkeep日間のデータを横に並べる
-        after = pd.concat([self._data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
+        after = pd.concat([data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
+        #after = pd.concat([self._data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
         after = after.dropna(how='any')
         after = after.sort_index(axis=1, level=(0,1))
         after = after[after.index.isin(before.index)]
