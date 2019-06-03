@@ -122,15 +122,17 @@ class Kabu:
         after = after.sort_index(axis=1, level=(0,1))
         after = after[after.index.isin(before.index)]
 
-        #無駄な処理だが、Pandasを維持するため、NumPyにする直前でMinMax
-        #1次元にするとMinMaxできないので、二次元化する
+        #出力データ
+        label = self._rule3(after)
+
+        #入力データ1
         dataset = np.reshape(
             before.values.flatten().reshape(-1,1),
             [len(before.index), self._config['term'], len(data.columns)])
-            #[len(before.index), len(self._data.columns), self._config['term']])
-        label = self._rule3(after)
+
+        #入力データ2
         dataset2 = np.reshape(
-            before.sort_index(axis=1,level=1).values.flatten().reshape(-1,1),
+            before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
         wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
@@ -165,14 +167,32 @@ class Kabu:
             dropout=.2,
             return_sequences=False))(lstm_a1)
         lstm_a1 = Dropout(0.2)(lstm_a1)
-        dense_2 = Dense(
-            units= len(self._y[0]))(lstm_a1)
-        output = Activation('tanh')(dense_2)
-        #output = Activation('softmax')(dense_2)
 
-        #model = Model(inputs=input_raw,outputs=output)
-        model = Model(inputs=[input_raw],outputs=output)
-        #model = Model(inputs=[input_raw,input_wav],outputs=output)
+        input_wav = Input(shape=(dimension,days))
+        lstm_b1 = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=True))(input_wav)
+        lstm_b1 = Dropout(0.2)(lstm_b1)
+        lstm_b1 = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=True))(lstm_b1)
+        lstm_b1 = Dropout(0.2)(lstm_b1)
+        lstm_b1 = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=True))(lstm_b1)
+        lstm_b1 = Dropout(0.2)(lstm_b1)
+        lstm_b1 = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            dropout=.2,
+            return_sequences=False))(lstm_b1)
+        lstm_b1 = Dropout(0.2)(lstm_b1)
+
+        merged = Concatenate()([lstm_a1,lstm_b1])
+        dense_2 = Dense(
+            units= len(self._y[0]))(merged)
+
+        output = Activation('tanh')(dense_2)
+        model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
         self._model_for_save = model
@@ -185,7 +205,7 @@ class Kabu:
     def _calculate(self):
         early_stopping = EarlyStopping(patience=10, verbose=1)
         self._model.fit(
-            [self._x], self._y,
+            [self._x,self._wx], self._y,
             #[self._x,self._wx], self._y,
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
@@ -194,14 +214,14 @@ class Kabu:
             callbacks=[early_stopping])
 
     def _predict(self):
-        ans = self._model.predict([self._z])
+        ans = self._model.predict([self._z,self._wz])
         ans = self._scaler.inverse_transform(ans)
         #ans = self._model.predict([self._z,self._wz])
         print(np.round(ans,decimals=2))
         return ans
 
     def _validate(self):
-        ans = self._model.predict([self._x])
+        ans = self._model.predict([self._x,self._wx])
         ans = self._scaler.inverse_transform(ans)
         cal = self._scaler.inverse_transform(self._y)
         #ans = self._model.predict([self._x,self._wx])
