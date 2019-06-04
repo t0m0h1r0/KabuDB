@@ -51,9 +51,11 @@ class Kabu:
         #self._data = np.log(self._data)[-self._config['days']:]
 
     def _save(self):
+        '''
         with open(self._filename+'.json','w') as f:
             f.write(self._model_for_save.to_json())
         self._model.save_weights(self._filename+'.hdf5')
+        '''
         self._model_for_save.save(self._filename+'.h5')
 
     def _load(self):
