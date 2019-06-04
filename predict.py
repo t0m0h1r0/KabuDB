@@ -135,8 +135,7 @@ class Kabu:
             before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
-        wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
-        #print(wave)
+        wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
 
         self._y = label.values
         self._x,self._z = np.split(dataset,[len(self._y)])
@@ -149,41 +148,44 @@ class Kabu:
         input_raw = Input(shape=(days,dimension))
         lstm_a1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            #return_sequences=False,
+            activation='relu',
             return_sequences=True))(input_raw)
         lstm_a1 = Dropout(0.2)(lstm_a1)
         lstm_a1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            #return_sequences=False,
+            activation='relu',
             return_sequences=True))(lstm_a1)
         lstm_a1 = Dropout(0.2)(lstm_a1)
         lstm_a1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            #return_sequences=False,
+            activation='tanh',
             return_sequences=True))(lstm_a1)
         lstm_a1 = Dropout(0.2)(lstm_a1)
         lstm_a1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            dropout=.2,
+            activation='tanh',
             return_sequences=False))(lstm_a1)
         lstm_a1 = Dropout(0.2)(lstm_a1)
 
         input_wav = Input(shape=(dimension,days))
         lstm_b1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
+            activation='relu',
             return_sequences=True))(input_wav)
         lstm_b1 = Dropout(0.2)(lstm_b1)
         lstm_b1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
+            activation='relu',
             return_sequences=True))(lstm_b1)
         lstm_b1 = Dropout(0.2)(lstm_b1)
         lstm_b1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
+            activation='tanh',
             return_sequences=True))(lstm_b1)
         lstm_b1 = Dropout(0.2)(lstm_b1)
         lstm_b1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            dropout=.2,
+            activation='tanh',
             return_sequences=False))(lstm_b1)
         lstm_b1 = Dropout(0.2)(lstm_b1)
 
@@ -191,7 +193,7 @@ class Kabu:
         dense_2 = Dense(
             units= len(self._y[0]))(merged)
 
-        output = Activation('tanh')(dense_2)
+        output = Activation('sigmoid')(dense_2)
         model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
