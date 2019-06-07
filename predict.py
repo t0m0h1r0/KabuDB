@@ -202,7 +202,7 @@ class Kabu:
         self._model_for_save = model
         if gpus>1:
             model = multi_gpu_model(model,gpus=gpus)
-        model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         #model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         self._model = model
 
