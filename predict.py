@@ -13,7 +13,7 @@ from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
 from keras.optimizers import Adam, RMSprop
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
-from keras.utils.training_utils import multi_gpu_model
+from keras.utils import multi_gpu_model
 
 from sklearn.preprocessing import MinMaxScaler
 
