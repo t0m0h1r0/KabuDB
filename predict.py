@@ -22,7 +22,7 @@ class Kabu:
         self._data =[]
         self._filename = filename
         self._config = {
-            'days':4000,
+            'days':1000,
             'keep':2,
             'term':64,
             #'category':(-.3,.0,+.3)
@@ -107,7 +107,7 @@ class Kabu:
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
-        self._scaler = MinMaxScaler(feature_range=(0, 1))
+        self._scaler = MinMaxScaler(feature_range=(-1, 1))
         #data = self._data
         data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
             index=self._data.index, columns=self._data.columns)
@@ -150,12 +150,12 @@ class Kabu:
         input_raw = Input(shape=(days,dimension))
         lstm_a1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            activation='relu',
+            activation='tanh',
             return_sequences=True))(input_raw)
         lstm_a1 = Dropout(0.2)(lstm_a1)
         lstm_a1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            activation='relu',
+            activation='tanh',
             return_sequences=True))(lstm_a1)
         lstm_a1 = Dropout(0.2)(lstm_a1)
         lstm_a1 = Bidirectional(LSTM(
@@ -172,12 +172,12 @@ class Kabu:
         input_wav = Input(shape=(dimension,days))
         lstm_b1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            activation='relu',
+            activation='tanh',
             return_sequences=True))(input_wav)
         lstm_b1 = Dropout(0.2)(lstm_b1)
         lstm_b1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
-            activation='relu',
+            activation='tanh',
             return_sequences=True))(lstm_b1)
         lstm_b1 = Dropout(0.2)(lstm_b1)
         lstm_b1 = Bidirectional(LSTM(
@@ -202,7 +202,7 @@ class Kabu:
         self._model_for_save = model
         if gpus>1:
             model = multi_gpu_model(model,gpus=gpus)
-        model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+        model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         #model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         self._model = model
 
