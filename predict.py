@@ -9,7 +9,8 @@ np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
 
 from keras.models import Sequential, model_from_json, load_model, Model
 from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, Input, Multiply, Concatenate
-from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU, ConvLSTM2D
+from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
+from keras.layers.convolutional_recurrent import ConvLSTM2D
 from keras.optimizers import Adam, RMSprop
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
