@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 import scipy.fftpack
+import scipy.signal
 np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
 
 from keras.models import Sequential, model_from_json, load_model, Model
@@ -130,6 +131,7 @@ class Kabu:
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
         wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
+        wave = np.signal.cwt(dataset,axis=2)
         print(wave)
 
         self._y = label.values
