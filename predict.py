@@ -224,7 +224,7 @@ class Kabu:
         #ans = self._model.predict([self._x,self._wx])
         ans = list(zip(cal,ans))
         for input,output in np.round(ans,decimals=2):
-            print(input,output,'=>',np.dot(input,output))
+            print(input,output,'=>',input-output)
 
 def download(filename):
     import pandas_datareader.data as pdr
