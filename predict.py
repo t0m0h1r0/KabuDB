@@ -175,8 +175,7 @@ class Kabu:
             units= 200,
             filters=20,
             kernel_size=10,
-            activation='tanh',
-            return_sequences=True)(input_raw)
+            activation='tanh')(input_raw)
         lstm_a1 = Dropout(0.2)(lstm_a1)
 
         input_wav = Input(shape=(dimension,days))
