@@ -130,8 +130,8 @@ class Kabu:
             before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
-        wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
-        #wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
+        #wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
+        wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
         wave = wave / float(wave.shape[2])
         '''
         import pywt
@@ -208,7 +208,7 @@ class Kabu:
         self._model = model
 
     def _calculate(self):
-        early_stopping = EarlyStopping(patience=20, verbose=1)
+        early_stopping = EarlyStopping(patience=50, verbose=1)
         self._model.fit(
             [self._x,self._wx], self._y,
             #[self._x,self._wx], self._y,
