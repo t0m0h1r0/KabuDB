@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 import scipy.fftpack
+import scipy.signal
 np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
 
 from keras.models import Sequential, model_from_json, load_model, Model
@@ -17,6 +18,8 @@ from keras.utils.np_utils import to_categorical
 from keras.utils import multi_gpu_model
 
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer, FunctionTransformer
+
+from qrnn import QRNN
 
 class Kabu:
     def __init__(self,filename='^N225.csv'):
@@ -57,41 +60,7 @@ class Kabu:
     def _load(self):
         self._model = load_model(self._filename+'.h5')
 
-    def _rule1(self,data):
-        diff = []
-        borders = np.concatenate(
-            [[-float('inf')],
-            self._config['category'],
-            [float('inf')]])
-        for k in data.index:
-            #翌日購入,翌々日売却
-            buy = data.at[k,(1,'Open')]
-            sell = data.at[k,(2,'Open')]
-            diff.append(sell/buy-1.)
-            #diff.append(sell-buy)
-        nums, bins = pd.cut(diff, borders, labels=range(len(borders)-1),retbins=True)
-        output = to_categorical(nums)
-        output = pd.DataFrame(output,index=data.index)
-        print((bins)*100.)
-        #print((np.exp(bins)-1.)*100.)
-        return output
-
-    def _rule2(self,data,counts=6):
-        diff = []
-        for k in data.index:
-            #翌日購入,翌々日売却
-            buy = data.at[k,(1,'Open')]
-            sell = data.at[k,(2,'Open')]
-            diff.append(sell/buy-1.)
-            #diff.append(sell-buy)
-        nums, bins = pd.qcut(diff,counts,labels=range(counts),retbins=True)
-        output = to_categorical(nums)
-        output = pd.DataFrame(output,index=data.index)
-        print((bins)*100.)
-        #print((np.exp(bins)-1.)*100.)
-        return output
-
-    def _rule3(self,data):
+    def _rule(self,data):
         output = data.sort_index(axis=1,level=(0,1)).loc[:,(1,slice(None))]
         return output
 
@@ -117,7 +86,7 @@ class Kabu:
         after = after[after.index.isin(before.index)]
 
         #出力データ
-        label = self._rule3(after)
+        label = self._rule(after)
 
         #入力データ1
         dataset = np.reshape(
@@ -129,8 +98,15 @@ class Kabu:
             before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
+        #wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
         wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
+        wave = wave / float(wave.shape[2])
+        '''
+        import pywt
+        cA, cD = pywt.dwt(dataset2,'db1',axis=2)
+        wave = np.concatenate([cA,cD],axis=2)
         print(wave)
+        '''
 
         self._y = label.values
         self._x,self._z = np.split(dataset,[len(self._y)])
@@ -200,7 +176,7 @@ class Kabu:
         self._model = model
 
     def _calculate(self):
-        early_stopping = EarlyStopping(patience=20, verbose=1)
+        early_stopping = EarlyStopping(patience=50, verbose=1)
         self._model.fit(
             [self._x,self._wx], self._y,
             #[self._x,self._wx], self._y,
