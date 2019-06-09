@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
     if(args.update_csv):
         download(args.csv_filename)
-        
+
     a=Kabu(filename=args.csv_filename)
     a._read()
     if(args.visualize):
