@@ -149,7 +149,6 @@ class Kabu:
         dimension = len(self._data.columns)
 
         input_raw = Input(shape=(days,dimension))
-        '''
         lstm_a1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
             activation='tanh',
@@ -169,11 +168,6 @@ class Kabu:
             units= self._ml['hidden'],
             activation='tanh',
             return_sequences=False))(lstm_a1)
-        lstm_a1 = Dropout(0.2)(lstm_a1)
-        '''
-        lstm_a1 = ConvLSTM2D(
-            filters=20,
-            kernel_size=10)(input_raw)
         lstm_a1 = Dropout(0.2)(lstm_a1)
 
         input_wav = Input(shape=(dimension,days))
