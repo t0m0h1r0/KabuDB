@@ -132,7 +132,8 @@ class Kabu:
         #離散フーリエ変換
         #wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
         import pywt
-        wave, d = pywt.dwt(dataset2,'haar',axis=2)
+        cA, cD = pywt.dwt(dataset2,'haar',axis=2)
+        wave = np.concatenate([cA,cD],axis=1)
         print(wave)
 
         self._y = label.values
