@@ -233,6 +233,18 @@ class Kabu:
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',np.dot(input,output))
 
+def download(filename):
+    import pandas_datareader.data as pdr
+    import yfinance as yf
+    import datetime as dt
+    yf.pdr_override()
+
+    today = '{0:%Y-%m-%d}'.format(dt.date.today())
+    data = pdr.get_data_yahoo('^N225','2000-01-01',)
+    data.to_csv(filename)
+
+
+
 if __name__ == '__main__':
     import argparse as ap
     parser = ap.ArgumentParser()
@@ -241,8 +253,12 @@ if __name__ == '__main__':
     parser.add_argument('-f','--csv_filename',type=str,default='^N225.csv')
     parser.add_argument('-a','--compare_all',action='store_true')
     parser.add_argument('-g','--gpus',type=int,default=1)
+    parser.add_argument('-u','--update_csv',action='store_true')
     args = parser.parse_args()
 
+    if(args.update_csv):
+        download(args.csv_filename)
+        
     a=Kabu(filename=args.csv_filename)
     a._read()
     if(args.visualize):
