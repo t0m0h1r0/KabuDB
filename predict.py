@@ -136,7 +136,7 @@ class Kabu:
         wave = wave / float(wave.shape[2])
         '''
         import pywt
-        cA, cD = pywt.dwt(dataset2,'mexh',axis=2)
+        cA, cD = pywt.dwt(dataset2,'db1',axis=2)
         wave = np.concatenate([cA,cD],axis=2)
         print(wave)
 
