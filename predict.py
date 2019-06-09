@@ -98,7 +98,7 @@ class Kabu:
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
-        self._scaler = PowerTransformer(feature_range=(-1, 1))
+        self._scaler = PowerTransformer()
         #self._scaler = MinMaxScaler(feature_range=(-1, 1))
         #data = self._data
         data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
