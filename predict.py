@@ -171,7 +171,7 @@ class Kabu:
         lstm_a1 = Dropout(0.2)(lstm_a1)
         '''
         lstm_a1 = ConvLSTM2D(
-            units= self._ml['hidden'],
+            units= 200,
             activation='tanh',
             return_sequences=True)(input_raw)
         lstm_a1 = Dropout(0.2)(lstm_a1)
