@@ -133,7 +133,7 @@ class Kabu:
         #wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
         import pywt
         cA, cD = pywt.dwt(dataset2,'haar',axis=2)
-        wave = np.concatenate([cA,cD],axis=1)
+        wave = np.concatenate([cA,cD],axis=2)
         print(wave)
 
         self._y = label.values
