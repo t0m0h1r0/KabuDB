@@ -9,7 +9,7 @@ np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
 
 from keras.models import Sequential, model_from_json, load_model, Model
 from keras.layers import Dense, Activation, Dropout, InputLayer, Bidirectional, Input, Multiply, Concatenate
-from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU
+from keras.layers.recurrent import LSTM, RNN, SimpleRNN, GRU, ConvLSTM2D
 from keras.optimizers import Adam, RMSprop
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
@@ -148,6 +148,7 @@ class Kabu:
         dimension = len(self._data.columns)
 
         input_raw = Input(shape=(days,dimension))
+        '''
         lstm_a1 = Bidirectional(LSTM(
             units= self._ml['hidden'],
             activation='tanh',
@@ -167,6 +168,12 @@ class Kabu:
             units= self._ml['hidden'],
             activation='tanh',
             return_sequences=False))(lstm_a1)
+        lstm_a1 = Dropout(0.2)(lstm_a1)
+        '''
+        lstm_a1 = ConvLSTM2D(
+            units= self._ml['hidden'],
+            activation='tanh',
+            return_sequences=True)(input_raw)
         lstm_a1 = Dropout(0.2)(lstm_a1)
 
         input_wav = Input(shape=(dimension,days))
