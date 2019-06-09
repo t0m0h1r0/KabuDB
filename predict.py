@@ -219,7 +219,7 @@ class Kabu:
         ans = self._model.predict([self._x,self._wx])
         ans = self._scaler.inverse_transform(ans)
         cal = self._scaler.inverse_transform(self._y)
-        cal[0] = 0
+        cal[0] = cal[0]*float('nan')
         cal=np.roll(cal,-1)
         #ans = self._model.predict([self._x,self._wx])
         ans = list(zip(cal,ans))
