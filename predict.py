@@ -131,7 +131,6 @@ class Kabu:
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
         #wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
-        '''
         wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
         wave = wave / float(wave.shape[2])
         '''
@@ -139,6 +138,7 @@ class Kabu:
         cA, cD = pywt.dwt(dataset2,'db1',axis=2)
         wave = np.concatenate([cA,cD],axis=2)
         print(wave)
+        '''
 
         self._y = label.values
         self._x,self._z = np.split(dataset,[len(self._y)])
