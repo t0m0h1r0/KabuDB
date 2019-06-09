@@ -58,41 +58,7 @@ class Kabu:
     def _load(self):
         self._model = load_model(self._filename+'.h5')
 
-    def _rule1(self,data):
-        diff = []
-        borders = np.concatenate(
-            [[-float('inf')],
-            self._config['category'],
-            [float('inf')]])
-        for k in data.index:
-            #翌日購入,翌々日売却
-            buy = data.at[k,(1,'Open')]
-            sell = data.at[k,(2,'Open')]
-            diff.append(sell/buy-1.)
-            #diff.append(sell-buy)
-        nums, bins = pd.cut(diff, borders, labels=range(len(borders)-1),retbins=True)
-        output = to_categorical(nums)
-        output = pd.DataFrame(output,index=data.index)
-        print((bins)*100.)
-        #print((np.exp(bins)-1.)*100.)
-        return output
-
-    def _rule2(self,data,counts=6):
-        diff = []
-        for k in data.index:
-            #翌日購入,翌々日売却
-            buy = data.at[k,(1,'Open')]
-            sell = data.at[k,(2,'Open')]
-            diff.append(sell/buy-1.)
-            #diff.append(sell-buy)
-        nums, bins = pd.qcut(diff,counts,labels=range(counts),retbins=True)
-        output = to_categorical(nums)
-        output = pd.DataFrame(output,index=data.index)
-        print((bins)*100.)
-        #print((np.exp(bins)-1.)*100.)
-        return output
-
-    def _rule3(self,data):
+    def _rule(self,data):
         output = data.sort_index(axis=1,level=(0,1)).loc[:,(1,slice(None))]
         return output
 
@@ -118,7 +84,7 @@ class Kabu:
         after = after[after.index.isin(before.index)]
 
         #出力データ
-        label = self._rule3(after)
+        label = self._rule(after)
 
         #入力データ1
         dataset = np.reshape(
