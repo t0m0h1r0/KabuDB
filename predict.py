@@ -193,7 +193,9 @@ class Kabu:
 
         merged = Concatenate()([lstm_a1,lstm_b1])
         dense_2 = Dense(
-            units= len(self._y[0]))(merged)
+            units= len(self._x)*3)(merged)
+        dense_2 = Dense(
+            units= len(self._y[0]))(dense_2)
 
         output = Activation('sigmoid')(dense_2)
         model = Model(inputs=[input_raw,input_wav],outputs=output)
