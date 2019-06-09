@@ -16,7 +16,7 @@ from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
 from keras.utils import multi_gpu_model
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, PowerTransformer
 
 class Kabu:
     def __init__(self,filename='^N225.csv'):
@@ -98,7 +98,8 @@ class Kabu:
     def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
-        self._scaler = MinMaxScaler(feature_range=(-1, 1))
+        self._scaler = PowerTransformer(feature_range=(-1, 1))
+        #self._scaler = MinMaxScaler(feature_range=(-1, 1))
         #data = self._data
         data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
             index=self._data.index, columns=self._data.columns)
