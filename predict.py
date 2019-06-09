@@ -173,6 +173,7 @@ class Kabu:
         '''
         lstm_a1 = ConvLSTM2D(
             units= 200,
+            kernel_size=10,
             activation='tanh',
             return_sequences=True)(input_raw)
         lstm_a1 = Dropout(0.2)(lstm_a1)
