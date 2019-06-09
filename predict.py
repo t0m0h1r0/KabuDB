@@ -220,7 +220,7 @@ class Kabu:
         ans = self._scaler.inverse_transform(ans)
         cal = self._scaler.inverse_transform(self._y)
         cal[0] = np.multiply(cal[0],float('nan'))
-        cal=np.roll(cal,-1)
+        cal=np.roll(cal,-1, axis=0)
         #ans = self._model.predict([self._x,self._wx])
         ans = list(zip(cal,ans))
         for input,output in np.round(ans,decimals=2):
