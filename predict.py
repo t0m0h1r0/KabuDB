@@ -170,7 +170,7 @@ class KabuQRNN:
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',input-output)
 
-class KabuLSTM(Kabu):
+class KabuLSTM(KabuQRNN):
     def _build(self,gpus=1):
         days = self._config['term']
         dimension = len(self._data.columns)
