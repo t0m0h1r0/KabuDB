@@ -154,7 +154,7 @@ class KabuQRNN:
         early_stopping = EarlyStopping(patience=50, verbose=1)
         model.fit(
             x, y,
-            epochs=100,
+            epochs=1000,
             batch_size=self._ml['batch'],
             validation_split=0.2,
             shuffle=False)
