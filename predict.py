@@ -159,13 +159,14 @@ class KabuQRNN:
             shuffle=False,
             callbacks=[early_stopping])
 
-    def _predict(self,model,data,z):
+    def _predict(self,model,data):
+        _data = data[-self.config['term']:]
         for x in range(self._config['predict']):
+            x,y,z = self._generate(_data)
             y = model.predict(z)
+            _data = data[:0].append(pd.DataFrame(y,columns=data.columns))
             ans = self._scaler.inverse_transform(y)
             print(np.round(ans,decimals=2))
-            data = data.append(pd.DataFrame(y,columns=data.columns))
-            x,y,z = self._generate(data)
 
     def _validate(self,model,x,y):
         ans = model.predict(x)
