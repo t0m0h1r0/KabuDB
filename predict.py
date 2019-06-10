@@ -232,21 +232,23 @@ if __name__ == '__main__':
 
     a=KabuQRNN(filename=args.csv_filename)
     a._read()
-    if(args.visualize):
-        from keras.utils import plot_model
-        model = a._load()
-        model.summary()
-        plot_model(model, to_file='model.png')
-    elif(args.learn):
+    if(args.learn):
         x,y,z = a._generate()
         model,base = a._build(gpus=args.gpus)
         base.summary()
         a._calculate(model,x,y)
         a._predict(model,z)
         a._save(base)
+    elif(args.visualize):
+        from keras.utils import plot_model
+        model,base = a._build(gpus=args.gpus)
+        a._load(model)
+        base.summary()
+        plot_model(base, to_file='model.png')
     elif(args.compare_all):
-        model = a._load()
         x,y,z = a._generate()
+        model,base = a._build(gpus=args.gpus)
+        a._load(model)
         a._validate(model,x,y)
     else:
         x,y,z = a._generate()
