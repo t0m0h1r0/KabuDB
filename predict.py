@@ -114,7 +114,6 @@ class KabuQRNN:
             units= self._ml['hidden'],
             window_size=window,
             return_sequences=False,
-            dropout=0.2,
             stride=1,
             )(x)
 
@@ -125,7 +124,6 @@ class KabuQRNN:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=False,
-            dropout=0.2,
             stride=1,
             )(y)
 
