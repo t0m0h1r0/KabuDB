@@ -267,4 +267,4 @@ if __name__ == '__main__':
         x,y,z = a._generate(data)
         model,base = a._build(gpus=args.gpus)
         a._load(model)
-        a._predict(model,z)
+        a._predict(model,data,z)
