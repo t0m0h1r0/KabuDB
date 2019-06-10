@@ -29,6 +29,7 @@ class KabuQRNN:
             'days':1000,
             'keep':2,
             'term':64,
+            'predict':30,
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
@@ -159,7 +160,7 @@ class KabuQRNN:
             callbacks=[early_stopping])
 
     def _predict(self,model,data,z):
-        for x in range(10):
+        for x in range(self._config['predict']):
             y = model.predict(z)
             ans = self._scaler.inverse_transform(y)
             print(np.round(ans,decimals=2))
