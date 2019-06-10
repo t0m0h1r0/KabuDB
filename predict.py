@@ -58,7 +58,7 @@ class KabuQRNN:
         #self._data = np.log(self._data)[-self._config['days']:]
         data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
             index=self._data.index, columns=self._data.columns)
-            return data
+        return data
 
     def _save(self,model):
         model.save(self._filename+'.h5')
