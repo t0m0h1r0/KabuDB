@@ -105,7 +105,7 @@ class KabuQRNN:
     def _build(self,gpus=1):
         days = self._config['term']
         dimension = len(self._data.columns)
-        window=7
+        window=days
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
