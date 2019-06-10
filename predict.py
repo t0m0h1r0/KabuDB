@@ -118,6 +118,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
+            activation='relu',
             stride=1,
             )(x)
         x = Dropout(0.2)(x)
@@ -125,6 +126,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
+            activation='relu',
             stride=1,
             )(x)
         x = Dropout(0.2)(x)
@@ -132,6 +134,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
+            activation='relu',
             stride=1,
             )(x)
         x = Dropout(0.2)(x)
@@ -139,6 +142,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=False,
+            activation='relu',
             stride=1,
             )(x)
 
@@ -149,6 +153,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
+            activation='relu',
             stride=1,
             )(y)
         y = Dropout(0.2)(y)
@@ -156,6 +161,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
+            activation='relu',
             stride=1,
             )(y)
         y = Dropout(0.2)(y)
@@ -163,6 +169,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
+            activation='relu',
             stride=1,
             )(y)
         y = Dropout(0.2)(y)
@@ -170,6 +177,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=False,
+            activation='relu',
             stride=1,
             )(y)
 
