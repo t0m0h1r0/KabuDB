@@ -91,11 +91,13 @@ class KabuQRNN:
             before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
-        #wave = np.abs(sp.fftpack.fft(wave,axis=2))
-        #wave = np.abs(sp.fftpack.dct(wave,axis=2))
+        #wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
+
+        #離散コサイン変換
         #wave = sp.fftpack.dct(dataset2,axis=2)
         #wave = wave / float(wave.shape[2])
 
+        #離散Wavelet変換
         import pywt
         wave = pywt.wavedec(dataset2, wavelet='haar', axis=2)
         wave = np.concatenate(wave,axis=2)
