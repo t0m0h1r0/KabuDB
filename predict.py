@@ -62,6 +62,7 @@ class Kabu:
 
     def _load(self):
         model = load_model(self._filename+'.h5')
+        return model
 
     def _generate(self):
         term = self._config['term']
@@ -156,10 +157,10 @@ class Kabu:
         print(np.round(ans,decimals=2))
         return ans
 
-    def _validate(self):
-        ans = self._model.predict([self._x,self._wx])
+    def _validate(self,model,x,y):
+        ans = self._model.predict(x)
         ans = self._scaler.inverse_transform(ans)
-        cal = self._scaler.inverse_transform(self._y)
+        cal = self._scaler.inverse_transform(y)
         cal[0] = np.multiply(cal[0],float('nan'))
         cal=np.roll(cal,-1, axis=0)
         #ans = self._model.predict([self._x,self._wx])
