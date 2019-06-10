@@ -170,7 +170,6 @@ class KabuQRNN:
 
         ans = np.array(ans)
         ans = self._scaler.inverse_transform(ans)
-        print(ans)
         print(np.round(ans,decimals=2))
 
     def _validate(self,model,x,y):
