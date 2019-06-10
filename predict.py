@@ -125,6 +125,7 @@ class KabuQRNN:
             window_size=window,
             return_sequences=False,
             activation='relu',
+            dropout=0.2,
             stride=1,
             )(x)
 
@@ -136,6 +137,7 @@ class KabuQRNN:
             window_size=window,
             return_sequences=False,
             activation='relu',
+            dropout=0.2,
             stride=1,
             )(y)
 
