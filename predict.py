@@ -60,9 +60,9 @@ class KabuQRNN:
     def _save(self,model):
         model.save(self._filename+'.h5')
 
-    def _load(self):
-        model = load_model(self._filename+'.h5')
-        return model
+    def _load(self,model):
+        #model = load_model(self._filename+'.h5')
+        model.load_weights(self._filename+'.h5')
 
     def _generate(self):
         term = self._config['term']
@@ -249,6 +249,7 @@ if __name__ == '__main__':
         x,y,z = a._generate()
         a._validate(model,x,y)
     else:
-        model = a._load()
         x,y,z = a._generate()
+        model,base = a._build(gpus=args.gpus)
+        a._load(model)
         a._predict(model,z)
