@@ -158,7 +158,7 @@ class KabuQRNN:
         return ans
 
     def _validate(self,model,x,y):
-        ans = self._model.predict(x)
+        ans = model.predict(x)
         ans = self._scaler.inverse_transform(ans)
         cal = self._scaler.inverse_transform(y)
         cal[0] = np.multiply(cal[0],float('nan'))
