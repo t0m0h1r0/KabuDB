@@ -169,6 +169,7 @@ class KabuQRNN:
             _data = data.append(pd.DataFrame(y,columns=data.columns))
 
         ans = np.array(ans)
+        print(ans)
         ans = self._scaler.inverse_transform(ans)
         print(np.round(ans,decimals=2))
 
