@@ -161,11 +161,11 @@ class KabuQRNN:
 
     def _predict(self,model,data):
         _data = data[-1-self._config['term']:]
-        ans = []
+        ans = np.ndarray()
         for x in range(self._config['predict']):
             x,y,z = self._generate(_data)
             y = model.predict(z)
-            ans.append(y)
+            ans = np.append(ans,y,axis=0)
             _data = data.append(pd.DataFrame(y,columns=data.columns))
 
         ans = np.array(ans)
