@@ -33,8 +33,8 @@ class KabuQRNN:
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
         self._ml = {'hidden':256,'epoch':5000,'batch':64}
-        self._scaler = MinMaxScaler(feature_range=(-1, 1))
-        #self._scaler = PowerTransformer()
+        #self._scaler = MinMaxScaler(feature_range=(-1, 1))
+        self._scaler = PowerTransformer()
         #self._scaler = FunctionTransformer(func=lambda x:x, inverse_func=lambda x:x)
         self._x = []
         self._y = []
@@ -230,7 +230,11 @@ if __name__ == '__main__':
     if(args.update_csv):
         download(args.csv_filename)
 
-    a=KabuQRNN(filename=args.csv_filename)
+    if(args.qrnn):
+        a=KabuQRNN(filename=args.csv_filename)
+    else:
+        a=KabuLSTM(filename=args.csv_filename)
+
     a._read()
     if(args.learn):
         x,y,z = a._generate()
