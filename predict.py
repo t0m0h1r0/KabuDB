@@ -163,7 +163,6 @@ class KabuQRNN:
         _data = data[-1-self._config['term']:]
         for x in range(self._config['predict']):
             x,y,z = self._generate(_data)
-            print(z)
             y = model.predict(z)
             print(y)
             _data = data[:0].append(pd.DataFrame(y,columns=data.columns))
