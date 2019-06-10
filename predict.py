@@ -160,7 +160,7 @@ class KabuQRNN:
             callbacks=[early_stopping])
 
     def _predict(self,model,data):
-        _data = data[-self.config['term']:]
+        _data = data[-self._config['term']:]
         for x in range(self._config['predict']):
             x,y,z = self._generate(_data)
             y = model.predict(z)
