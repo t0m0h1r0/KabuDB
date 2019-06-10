@@ -57,7 +57,7 @@ class KabuQRNN:
         self._data = self._data.sort_index(axis=1)
         #self._data = np.log(self._data)[-self._config['days']:]
 
-    def _save(model,self):
+    def _save(self,model):
         model.save(self._filename+'.h5')
 
     def _load(self):
@@ -170,7 +170,7 @@ class KabuQRNN:
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',input-output)
 
-class KabuLSTM(KabuQRNN):
+class KabuLSTM(Kabu):
     def _build(self,gpus=1):
         days = self._config['term']
         dimension = len(self._data.columns)
