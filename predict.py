@@ -33,8 +33,8 @@ class KabuQRNN:
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
         self._ml = {'hidden':256,'epoch':5000,'batch':64}
-        #self._scaler = MinMaxScaler(feature_range=(-1, 1))
-        self._scaler = PowerTransformer()
+        self._scaler = MinMaxScaler(feature_range=(-1, 1))
+        #self._scaler = PowerTransformer()
         #self._scaler = FunctionTransformer(func=lambda x:x, inverse_func=lambda x:x)
         self._x = []
         self._y = []
@@ -105,7 +105,7 @@ class KabuQRNN:
     def _build(self,gpus=1):
         days = self._config['term']
         dimension = len(self._data.columns)
-        window=days
+        window=7
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
@@ -122,7 +122,7 @@ class KabuQRNN:
         y = SpatialDropout1D(0.2)(y)
         y = QRNN(
             units= self._ml['hidden'],
-            window_size=days,
+            window_size=window,
             return_sequences=False,
             stride=1,
             )(y)
