@@ -56,6 +56,9 @@ class KabuQRNN:
         self._data = self._data[-self._config['days']:]
         self._data = self._data.sort_index(axis=1)
         #self._data = np.log(self._data)[-self._config['days']:]
+        data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
+            index=self._data.index, columns=self._data.columns)
+            return data
 
     def _save(self,model):
         model.save(self._filename+'.h5')
@@ -64,11 +67,9 @@ class KabuQRNN:
         #model = load_model(self._filename+'.h5')
         model.load_weights(self._filename+'.h5')
 
-    def _generate(self):
+    def _generate(self, data):
         term = self._config['term']
         keep = self._config['keep']
-        data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
-            index=self._data.index, columns=self._data.columns)
 
         #当日を含めてterm日間のデータを横に並べる
         before = pd.concat([data.shift(+k) for k in range(term)], axis=1, keys=range(term))
@@ -157,12 +158,13 @@ class KabuQRNN:
             shuffle=False,
             callbacks=[early_stopping])
 
-    def _predict(self,model,z):
-        ans = model.predict(z)
-        ans = self._scaler.inverse_transform(ans)
-        #ans = self._model.predict([self._z,self._wz])
-        print(np.round(ans,decimals=2))
-        return ans
+    def _predict(self,model,data,z):
+        for x in range(10):
+            y = model.predict(z)
+            ans = self._scaler.inverse_transform(y)
+            print(np.round(ans,decimals=2))
+            np.append(data,y)
+            x,y,z = self._generate(data)
 
     def _validate(self,model,x,y):
         ans = model.predict(x)
@@ -242,9 +244,9 @@ if __name__ == '__main__':
     else:
         a=KabuLSTM(filename=args.csv_filename)
 
-    a._read()
+    data = a._read()
     if(args.learn):
-        x,y,z = a._generate()
+        x,y,z = a._generate(data)
         model,base = a._build(gpus=args.gpus)
         base.summary()
         a._calculate(model,x,y)
@@ -257,12 +259,12 @@ if __name__ == '__main__':
         base.summary()
         plot_model(base, to_file='model.png')
     elif(args.compare_all):
-        x,y,z = a._generate()
+        x,y,z = a._generate(data)
         model,base = a._build(gpus=args.gpus)
         a._load(model)
         a._validate(model,x,y)
     else:
-        x,y,z = a._generate()
+        x,y,z = a._generate(data)
         model,base = a._build(gpus=args.gpus)
         a._load(model)
         a._predict(model,z)
