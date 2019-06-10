@@ -109,7 +109,7 @@ class KabuQRNN:
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
-        x = Dropout(0.2)(x)
+        x = SpatialDropout1D(0.2)(x)
         x = QRNN(
             units= self._ml['hidden'],
             window_size=window,
@@ -120,7 +120,7 @@ class KabuQRNN:
 
         input_wav = Input(shape=(dimension,days))
         y = input_wav
-        y = Dropout(0.2)(y)
+        y = SpatialDropout1D(0.2)(y)
         y = QRNN(
             units= self._ml['hidden'],
             window_size=days,
