@@ -106,33 +106,33 @@ class Kabu:
         print(shape)
         x = input
         x = Dropout(0.2)(x)
-        x = QRNN(
+        x = Bidirectional(QRNN(
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
             stride=1,
-            )(x)
+            ))(x)
         x = Dropout(0.2)(x)
-        x = QRNN(
+        x = Bidirectional(QRNN(
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
             stride=1,
-            )(x)
+            ))(x)
         x = Dropout(0.2)(x)
-        x = QRNN(
+        x = Bidirectional(QRNN(
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
             stride=1,
-            )(x)
+            ))(x)
         x = Dropout(0.2)(x)
-        x = QRNN(
+        x = Bidirectional(QRNN(
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=False,
             stride=1,
-            )(x)
+            ))(x)
         x = Dense( units= shape[-1] )(x)
         output = Activation('sigmoid')(x)
 
