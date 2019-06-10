@@ -91,20 +91,27 @@ class Kabu:
             before.values.flatten().reshape(-1,1),
             [len(before.index), self._config['term'], len(data.columns)])
 
+        #入力データ2
+        wave = np.reshape(
+            before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
+            [len(before.index), len(data.columns), self._config['term']])
+        #離散フーリエ変換
+        #wave = np.abs(sp.fftpack.fft(wave,axis=2))
+        wave = np.abs(sp.fftpack.dct(wave,axis=2))
+        wave = wave / float(wave.shape[2])
 
         y = after.values
-        print(y)
         x,z = np.split(dataset,[len(y)])
+        wx,wz = np.split(wave,[len(y)])
 
-        return x,y,z
+        return [x,wx],y,[z,wz]
 
-    def _buildQRNN(self,shape,gpus=1):
+    def _buildQRNN(self,gpus=1):
         days = self._config['term']
         dimension = len(self._data.columns)
 
-        input = Input(shape=shape)
-        print(shape)
-        x = input
+        input_raw = Input(shape=(days,dimension))
+        x = input_raw
         x = Dropout(0.2)(x)
         x = QRNN(
             units= self._ml['hidden'],
@@ -133,10 +140,43 @@ class Kabu:
             return_sequences=False,
             stride=1,
             )(x)
-        x = Dense( units= shape[-1] )(x)
-        output = Activation('sigmoid')(x)
 
-        model = Model(inputs=input,outputs=output)
+        input_wav = Input(shape=(dimension,days))
+        y = input_wav
+        y = Dropout(0.2)(y)
+        y = QRNN(
+            units= self._ml['hidden'],
+            window_size=days,
+            return_sequences=True,
+            stride=1,
+            )(y)
+        y = Dropout(0.2)(y)
+        y = QRNN(
+            units= self._ml['hidden'],
+            window_size=days,
+            return_sequences=True,
+            stride=1,
+            )(y)
+        y = Dropout(0.2)(y)
+        y = QRNN(
+            units= self._ml['hidden'],
+            window_size=days,
+            return_sequences=True,
+            stride=1,
+            )(y)
+        y = Dropout(0.2)(y)
+        y = QRNN(
+            units= self._ml['hidden'],
+            window_size=days,
+            return_sequences=False,
+            stride=1,
+            )(y)
+
+        merged = Concatenate()([x,y])
+        label = Dense( units= dimension )(merged)
+        output = Activation('sigmoid')(label)
+
+        model = Model(inputs=[input_raw,input_wav],outputs=output)
         optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
 
         base = model
@@ -343,8 +383,7 @@ if __name__ == '__main__':
             a._save()
         else:
             x,y,z = a._generateQRNN()
-            print(x.shape)
-            model,base = a._buildQRNN(x.shape[1:],gpus=args.gpus)
+            model,base = a._buildQRNN(gpus=args.gpus)
             base.summary()
             a._calculateQRNN(model,x,y)
             a._predictQRNN(model,z)
