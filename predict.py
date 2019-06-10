@@ -141,8 +141,6 @@ class Kabu:
             return_sequences=False,
             stride=1,
             )(x)
-        x = Dense( units= shape[-1] )(x)
-        output = Activation('sigmoid')(x)
 
         input_wav = Input(shape=(dimension,days))
         y = input_wav
