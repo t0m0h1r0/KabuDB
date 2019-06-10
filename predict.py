@@ -32,7 +32,7 @@ class KabuQRNN:
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
-        self._ml = {'hidden':256,'epoch':5000,'batch':256}
+        self._ml = {'hidden':256,'epoch':5000,'batch':1024}
         self._scaler = MinMaxScaler(feature_range=(-1, 1))
         #self._scaler = PowerTransformer()
         #self._scaler = FunctionTransformer(func=lambda x:x, inverse_func=lambda x:x)
