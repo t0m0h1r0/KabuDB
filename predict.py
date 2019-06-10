@@ -98,7 +98,7 @@ class KabuQRNN:
 
         import pywt
         wave = pywt.wavedec(dataset2, wavelet='haar', axis=2)
-        wave = np.concatenate(w,axis=2)
+        wave = np.concatenate(wave,axis=2)
 
 
         y = after.values
