@@ -163,7 +163,7 @@ class KabuQRNN:
             y = model.predict(z)
             ans = self._scaler.inverse_transform(y)
             print(np.round(ans,decimals=2))
-            np.append(data,y)
+            data = data.append(y)
             x,y,z = self._generate(data)
 
     def _validate(self,model,x,y):
@@ -250,7 +250,6 @@ if __name__ == '__main__':
         model,base = a._build(gpus=args.gpus)
         base.summary()
         a._calculate(model,x,y)
-        a._predict(model,z)
         a._save(base)
     elif(args.visualize):
         from keras.utils import plot_model
