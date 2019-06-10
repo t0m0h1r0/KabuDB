@@ -21,7 +21,7 @@ from sklearn.preprocessing import MinMaxScaler, PowerTransformer, FunctionTransf
 
 from qrnn import QRNN
 
-class Kabu:
+class KabuQRNN:
     def __init__(self,filename='^N225.csv'):
         self._data =[]
         self._filename = filename
@@ -114,6 +114,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=window,
             return_sequences=False,
+            dropout=0.2,
             stride=1,
             )(x)
 
@@ -124,6 +125,7 @@ class Kabu:
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=False,
+            dropout=0.2,
             stride=1,
             )(y)
 
@@ -167,6 +169,41 @@ class Kabu:
         ans = list(zip(cal,ans))
         for input,output in np.round(ans,decimals=2):
             print(input,output,'=>',input-output)
+
+class KabuLSTM(Kabu):
+    def _build(self,gpus=1):
+        days = self._config['term']
+        dimension = len(self._data.columns)
+        window=days
+
+        input_raw = Input(shape=(days,dimension))
+        x = input_raw
+        x = Dropout(0.2)(x)
+        x = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=False,
+            ))(x)
+
+        input_wav = Input(shape=(dimension,days))
+        y = input_wav
+        y = Dropout(0.2)(y)
+        y = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=False,
+            ))(y)
+
+        merged = Concatenate()([x,y])
+        label = Dense( units= dimension )(merged)
+        output = Activation('sigmoid')(label)
+
+        model = Model(inputs=[input_raw,input_wav],outputs=output)
+        optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
+
+        base = model
+        if gpus>1:
+            model = multi_gpu_model(model,gpus=gpus)
+        model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
+        return model,base
 
 def download(filename):
     import pandas_datareader.data as pdr
