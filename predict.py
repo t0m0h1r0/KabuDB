@@ -97,7 +97,8 @@ class Kabu:
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
         #wave = np.abs(sp.fftpack.fft(wave,axis=2))
-        wave = np.abs(sp.fftpack.dct(wave,axis=2))
+        wave = sp.fftpack.dct(wave,axis=2)
+        #wave = np.abs(sp.fftpack.dct(wave,axis=2))
         wave = wave / float(wave.shape[2])
 
         y = after.values
@@ -113,33 +114,39 @@ class Kabu:
         input_raw = Input(shape=(days,dimension))
         x = input_raw
         x = Dropout(0.2)(x)
-        x = QRNN(
+        x = Bidirectional(QRNN(
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
             stride=1,
-            )(x)
+            ))(x)
         x = Dropout(0.2)(x)
-        x = QRNN(
+        x = Bidirectional(QRNN(
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
             stride=1,
-            )(x)
+            ))(x)
         x = Dropout(0.2)(x)
-        x = QRNN(
+        x = Bidirectional(QRNN(
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=True,
             stride=1,
-            )(x)
+            ))(x)
         x = Dropout(0.2)(x)
-        x = QRNN(
+        x = Bidirectional(QRNN(
             units= self._ml['hidden'],
             window_size=days,
             return_sequences=False,
             stride=1,
+<<<<<<< HEAD
             )(x)
+=======
+            ))(x)
+        x = Dense( units= shape[-1] )(x)
+        output = Activation('sigmoid')(x)
+>>>>>>> 740fef25f28663cd200ba245dba6ec5468458cb1
 
         input_wav = Input(shape=(dimension,days))
         y = input_wav
