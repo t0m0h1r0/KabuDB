@@ -20,6 +20,7 @@ from keras.utils import multi_gpu_model
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer, FunctionTransformer
 
 from qrnn import QRNN
+import scipy.stats as ss
 
 class KabuQRNN:
     def __init__(self,filename='^N225.csv'):
@@ -34,8 +35,8 @@ class KabuQRNN:
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
         self._ml = {'hidden':512,'epoch':5000,'batch':1024}
-        self._scaler = MinMaxScaler(feature_range=(-1, 1))
-        #self._scaler = PowerTransformer()
+        #self._scaler = MinMaxScaler(feature_range=(-1, 1))
+        self._scaler = PowerTransformer(method='box-cox',standardize=False)
         #self._scaler = FunctionTransformer(func=lambda x:x, inverse_func=lambda x:x)
         self._x = []
         self._y = []
