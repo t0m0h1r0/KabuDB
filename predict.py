@@ -97,8 +97,8 @@ class Kabu:
             [len(before.index), len(data.columns), self._config['term']])
         #離散フーリエ変換
         #wave = np.abs(sp.fftpack.fft(wave,axis=2))
-        wave = sp.fftpack.dct(wave,axis=2)
         #wave = np.abs(sp.fftpack.dct(wave,axis=2))
+        wave = sp.fftpack.dct(wave,axis=2)
         wave = wave / float(wave.shape[2])
 
         y = after.values
