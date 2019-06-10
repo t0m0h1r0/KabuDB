@@ -163,7 +163,7 @@ class KabuQRNN:
             y = model.predict(z)
             ans = self._scaler.inverse_transform(y)
             print(np.round(ans,decimals=2))
-            data = data.append(y)
+            data = data.append(pd.DataFrame(y))
             x,y,z = self._generate(data)
 
     def _validate(self,model,x,y):
