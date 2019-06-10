@@ -161,7 +161,7 @@ class KabuQRNN:
 
     def _predict(self,model,data):
         _data = data[-1-self._config['term']:]
-        ans = np.array([[]])
+        ans = np.zeros((0,len(data.columns)))
         for x in range(self._config['predict']):
             x,y,z = self._generate(_data)
             y = model.predict(z)
