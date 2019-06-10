@@ -57,17 +57,13 @@ class Kabu:
         self._data = self._data.sort_index(axis=1)
         #self._data = np.log(self._data)[-self._config['days']:]
 
-    def _save(self):
-        self._model_for_save.save(self._filename+'.h5')
+    def _save(model,self):
+        model.save(self._filename+'.h5')
 
     def _load(self):
-        self._model = load_model(self._filename+'.h5')
+        model = load_model(self._filename+'.h5')
 
-    def _rule(self,data):
-        output = data.sort_index(axis=1,level=(0,1)).loc[:,(1,slice(None))]
-        return output
-
-    def _generateQRNN(self):
+    def _generate(self):
         term = self._config['term']
         keep = self._config['keep']
         data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
@@ -78,10 +74,8 @@ class Kabu:
         before = before.dropna(how='any')
         before = before.sort_index(axis=1, level=(0,1))
 
-        #当日からkeep日間のデータを横に並べる
-        #after = pd.concat([data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
+        #翌日のデータ
         after = data.shift(-1)
-        #after = pd.concat([self._data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
         after = after.dropna(how='any')
         after = after.sort_index(axis=1, level=(0,1))
         after = after[after.index.isin(before.index)]
@@ -107,7 +101,7 @@ class Kabu:
 
         return [x,wx],y,[z,wz]
 
-    def _buildQRNN(self,gpus=1):
+    def _build(self,gpus=1):
         days = self._config['term']
         dimension = len(self._data.columns)
         window=days
@@ -145,7 +139,7 @@ class Kabu:
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         return model,base
 
-    def _calculateQRNN(self,model,x,y):
+    def _calculate(self,model,x,y):
         early_stopping = EarlyStopping(patience=50, verbose=1)
         model.fit(
             x, y,
@@ -155,134 +149,8 @@ class Kabu:
             shuffle=False,
             callbacks=[early_stopping])
 
-    def _predictQRNN(self,model,z):
+    def _predict(self,model,z):
         ans = model.predict(z)
-        ans = self._scaler.inverse_transform(ans)
-        #ans = self._model.predict([self._z,self._wz])
-        print(np.round(ans,decimals=2))
-        return ans
-
-    def _generate(self):
-        term = self._config['term']
-        keep = self._config['keep']
-        data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
-            index=self._data.index, columns=self._data.columns)
-
-        #当日を含めてterm日間のデータを横に並べる
-        before = pd.concat([data.shift(+k) for k in range(term)], axis=1, keys=range(term))
-        before = before.dropna(how='any')
-        before = before.sort_index(axis=1, level=(0,1))
-
-        #当日からkeep日間のデータを横に並べる
-        after = pd.concat([data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
-        #after = pd.concat([self._data.shift(-k) for k in range(keep)], axis=1, keys=range(keep))
-        after = after.dropna(how='any')
-        after = after.sort_index(axis=1, level=(0,1))
-        after = after[after.index.isin(before.index)]
-
-        #出力データ
-        label = self._rule(after)
-
-        #入力データ1
-        dataset = np.reshape(
-            before.values.flatten().reshape(-1,1),
-            [len(before.index), self._config['term'], len(data.columns)])
-
-        #入力データ2
-        dataset2 = np.reshape(
-            before.sort_index(axis=1,level=(1,0)).values.flatten().reshape(-1,1),
-            [len(before.index), len(data.columns), self._config['term']])
-        #離散フーリエ変換
-        #wave = np.abs(sp.fftpack.fft(dataset2,axis=2))
-        wave = np.abs(sp.fftpack.dct(dataset2,axis=2))
-        wave = wave / float(wave.shape[2])
-        '''
-        import pywt
-        cA, cD = pywt.dwt(dataset2,'db1',axis=2)
-        wave = np.concatenate([cA,cD],axis=2)
-        print(wave)
-        '''
-
-        self._y = label.values
-        self._x,self._z = np.split(dataset,[len(self._y)])
-        self._wx,self._wz = np.split(wave,[len(self._y)])
-
-    def _build(self,gpus=1):
-        days = self._config['term']
-        dimension = len(self._data.columns)
-
-        input_raw = Input(shape=(days,dimension))
-        lstm_a1 = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            activation='tanh',
-            return_sequences=True))(input_raw)
-        lstm_a1 = Dropout(0.2)(lstm_a1)
-        lstm_a1 = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            activation='tanh',
-            return_sequences=True))(lstm_a1)
-        lstm_a1 = Dropout(0.2)(lstm_a1)
-        lstm_a1 = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            activation='tanh',
-            return_sequences=True))(lstm_a1)
-        lstm_a1 = Dropout(0.2)(lstm_a1)
-        lstm_a1 = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            activation='tanh',
-            return_sequences=False))(lstm_a1)
-        lstm_a1 = Dropout(0.2)(lstm_a1)
-
-        input_wav = Input(shape=(dimension,days))
-        lstm_b1 = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            activation='tanh',
-            return_sequences=True))(input_wav)
-        lstm_b1 = Dropout(0.2)(lstm_b1)
-        lstm_b1 = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            activation='tanh',
-            return_sequences=True))(lstm_b1)
-        lstm_b1 = Dropout(0.2)(lstm_b1)
-        lstm_b1 = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            activation='tanh',
-            return_sequences=True))(lstm_b1)
-        lstm_b1 = Dropout(0.2)(lstm_b1)
-        lstm_b1 = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            activation='tanh',
-            return_sequences=False))(lstm_b1)
-        lstm_b1 = Dropout(0.2)(lstm_b1)
-
-        merged = Concatenate()([lstm_a1,lstm_b1])
-        dense_2 = Dense(
-            units= len(self._y[0]))(merged)
-
-        output = Activation('sigmoid')(dense_2)
-        model = Model(inputs=[input_raw,input_wav],outputs=output)
-        optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
-
-        self._model_for_save = model
-        if gpus>1:
-            model = multi_gpu_model(model,gpus=gpus)
-        model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
-        #model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-        self._model = model
-
-    def _calculate(self):
-        early_stopping = EarlyStopping(patience=50, verbose=1)
-        self._model.fit(
-            [self._x,self._wx], self._y,
-            #[self._x,self._wx], self._y,
-            epochs=self._ml['epoch'],
-            batch_size=self._ml['batch'],
-            validation_split=0.2,
-            shuffle=False,
-            callbacks=[early_stopping])
-
-    def _predict(self):
-        ans = self._model.predict([self._z,self._wz])
         ans = self._scaler.inverse_transform(ans)
         #ans = self._model.predict([self._z,self._wz])
         print(np.round(ans,decimals=2))
@@ -330,28 +198,21 @@ if __name__ == '__main__':
     a._read()
     if(args.visualize):
         from keras.utils import plot_model
-        a._load()
-        a._model.summary()
-        plot_model(a._model, to_file='model.png')
+        model = a._load()
+        model.summary()
+        plot_model(model, to_file='model.png')
     elif(args.learn):
-        if(not args.qrnn):
-            a._generate()
-            a._build(gpus=args.gpus)
-            a._model_for_save.summary()
-            a._calculate()
-            a._predict()
-            a._save()
-        else:
-            x,y,z = a._generateQRNN()
-            model,base = a._buildQRNN(gpus=args.gpus)
-            base.summary()
-            a._calculateQRNN(model,x,y)
-            a._predictQRNN(model,z)
+        x,y,z = a._generate()
+        model,base = a._build(gpus=args.gpus)
+        base.summary()
+        a._calculate(model,x,y)
+        a._predict(model,z)
+        a._save(base)
     elif(args.compare_all):
-        a._load()
-        a._generate()
-        a._validate()
+        model = a._load()
+        x,y,z = a._generate()
+        a._validate(model,x,y)
     else:
-        a._load()
-        a._generate()
-        a._predict()
+        model = a._load()
+        x,y,z = a._generate()
+        a._predict(model,z)
