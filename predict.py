@@ -26,7 +26,7 @@ class KabuQRNN:
         self._data =[]
         self._filename = filename
         self._config = {
-            'days':9000,
+            'days':500,
             'keep':2,
             'term':64,
             #'category':(-.3,.0,+.3)
