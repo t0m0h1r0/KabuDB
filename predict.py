@@ -27,7 +27,7 @@ class KabuQRNN:
         self._data =[]
         self._filename = filename
         self._config = {
-            'days':1000,
+            'days':500,
             'keep':2,
             'term':64,
             'predict':30,
@@ -213,15 +213,9 @@ class KabuQRNN:
         early_stopping = EarlyStopping(patience=50, verbose=1)
         model.fit(
             x, y,
-            epochs=200,
-            batch_size=self._ml['batch'],
-            validation_split=0.2,
-            shuffle=False)
-        model.fit(
-            x, y,
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
-            validation_split=0.2,
+            validation_split=0.3,
             shuffle=False,
             callbacks=[early_stopping])
 
@@ -260,11 +254,41 @@ class KabuLSTM(KabuQRNN):
         x = Dropout(0.2)(x)
         x = Bidirectional(LSTM(
             units= self._ml['hidden'],
+            return_sequences=True,
+            ))(x)
+        x = Dropout(0.2)(x)
+        x = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=True,
+            ))(x)
+        x = Dropout(0.2)(x)
+        x = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=True,
+            ))(x)
+        x = Dropout(0.2)(x)
+        x = Bidirectional(LSTM(
+            units= self._ml['hidden'],
             return_sequences=False,
             ))(x)
 
         input_wav = Input(shape=(dimension,days))
         y = input_wav
+        y = Dropout(0.2)(y)
+        y = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=True,
+            ))(y)
+        y = Dropout(0.2)(y)
+        y = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=True,
+            ))(y)
+        y = Dropout(0.2)(y)
+        y = Bidirectional(LSTM(
+            units= self._ml['hidden'],
+            return_sequences=True,
+            ))(y)
         y = Dropout(0.2)(y)
         y = Bidirectional(LSTM(
             units= self._ml['hidden'],
