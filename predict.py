@@ -210,7 +210,6 @@ class KabuLSTM(KabuQRNN):
     def _build(self, gpus=1, layers=4, hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
-        window=60
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
