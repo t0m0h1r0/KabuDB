@@ -112,6 +112,19 @@ class KabuQRNN:
 
         return [x,wx],y,[z,wz]
 
+    def _objective(self,x,y,trial):
+        layers = trial.suggest_int('layers',1,10)
+        hidden = trial.suggest_int('hidden',64,256)
+        dropout_rate = trial.suggest_uniform('dropout_rate',0,1)
+        activation = trial.suggest_categorical('activation',['sigmoid','relu'])
+        optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop'])
+
+        model, base = self._build(gpus=1,
+            layers=layers, hidden=hidden, activation=activation, optimizer=optimizer, dropout_rate=dropout_rate)
+        history = self._calculate(model,x,y)
+        return -np.amax(history.history['val_acc'])
+
+
     def _build(self, gpus=1, layers=4, hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
@@ -258,6 +271,7 @@ if __name__ == '__main__':
     parser.add_argument('-g','--gpus',type=int,default=1)
     parser.add_argument('-u','--update_csv',action='store_true')
     parser.add_argument('-q','--qrnn',action='store_true')
+    parser.add_argument('-o','--optimize',action='store_true')
     args = parser.parse_args()
 
     if(args.update_csv):
@@ -281,6 +295,15 @@ if __name__ == '__main__':
         a._load(model)
         base.summary()
         plot_model(base, to_file='model.png')
+    elif(args.optimize):
+        import optuna, functools
+        x,y,z = a._generate(data)
+        f = functools.partial(a._objective,x,y)
+
+        study = optuna.create_study()
+        study.optimize(f,n_trials=100)
+        print('Result:',study.best_params)
+
     elif(args.compare_all):
         x,y,z = a._generate(data)
         model,base = a._build(gpus=args.gpus)
