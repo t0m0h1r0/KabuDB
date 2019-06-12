@@ -112,97 +112,46 @@ class KabuQRNN:
 
         return [x,wx],y,[z,wz]
 
-    def _build(self,gpus=1):
+    def _build(self, gpus=1, layers=4, hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
         window=60
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
-        x = SpatialDropout1D(0.2)(x)
-        x = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=True,
-            stride=1,
-            )(x)
-        x = SpatialDropout1D(0.2)(x)
-        x = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=True,
-            stride=1,
-            )(x)
-        x = SpatialDropout1D(0.2)(x)
-        x = SpatialDropout1D(0.2)(x)
-        x = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=True,
-            stride=1,
-            )(x)
-        x = SpatialDropout1D(0.2)(x)
-        x = SpatialDropout1D(0.2)(x)
-        x = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=True,
-            stride=1,
-            )(x)
-        x = SpatialDropout1D(0.2)(x)
-        x = SpatialDropout1D(0.2)(x)
-        x = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=False,
-            stride=1,
-            )(x)
+        for k in range(layers):
+            if k != layers-1:
+                s = True
+            else:
+                s = False
+            x = SpatialDropout1D(dropout_rate)(x)
+            x = QRNN(
+                units=hidden,
+                window_size=window,
+                return_sequences=s,
+                stride=1,
+                )(x)
 
         input_wav = Input(shape=(dimension,days))
         y = input_wav
-        y = SpatialDropout1D(0.2)(y)
-        y = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=True,
-            stride=1,
-            )(y)
-        y = SpatialDropout1D(0.2)(y)
-        y = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=True,
-            stride=1,
-            )(y)
-        y = SpatialDropout1D(0.2)(y)
-        y = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=True,
-            stride=1,
-            )(y)
-        y = SpatialDropout1D(0.2)(y)
-        y = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=True,
-            stride=1,
-            )(y)
-        y = SpatialDropout1D(0.2)(y)
-        y = QRNN(
-            units= self._ml['hidden'],
-            window_size=window,
-            return_sequences=False,
-            stride=1,
-            )(y)
+        for k in range(layers):
+            if k != layers-1:
+                s = True
+            else:
+                s = False
+            y = SpatialDropout1D(dropout_rate)(y)
+            y = QRNN(
+                units=hidden,
+                window_size=window,
+                return_sequences=s,
+                stride=1,
+                )(y)
 
         merged = Concatenate()([x,y])
         label = Dense( units= dimension )(merged)
-        output = Activation('sigmoid')(label)
+        output = Activation(activation)(label)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
-        optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
-
         base = model
         if gpus>1:
             model = multi_gpu_model(model,gpus=gpus)
@@ -211,13 +160,14 @@ class KabuQRNN:
 
     def _calculate(self,model,x,y):
         early_stopping = EarlyStopping(patience=50, verbose=1)
-        model.fit(
+        history = model.fit(
             x, y,
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
             validation_split=0.3,
             shuffle=False,
             callbacks=[early_stopping])
+        return history
 
     def _predict(self,model,data):
         _data = data[-1-self._config['term']:]
@@ -244,64 +194,42 @@ class KabuQRNN:
             print(input,output,'=>',input-output)
 
 class KabuLSTM(KabuQRNN):
-    def _build(self,gpus=1):
+    def _build(self, gpus=1, layers=4, hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
-        window=days
+        window=60
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
-        x = Dropout(0.2)(x)
-        x = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            return_sequences=True,
-            ))(x)
-        x = Dropout(0.2)(x)
-        x = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            return_sequences=True,
-            ))(x)
-        x = Dropout(0.2)(x)
-        x = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            return_sequences=True,
-            ))(x)
-        x = Dropout(0.2)(x)
-        x = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            return_sequences=False,
-            ))(x)
+        for k in range(layers):
+            if k != layers-1:
+                s = True
+            else:
+                s = False
+            x = Dropout(dropout_rate)(x)
+            x = Bidirectional(LSTM(
+                units=hidden,
+                return_sequences=s,
+                ))(x)
 
         input_wav = Input(shape=(dimension,days))
         y = input_wav
-        y = Dropout(0.2)(y)
-        y = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            return_sequences=True,
-            ))(y)
-        y = Dropout(0.2)(y)
-        y = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            return_sequences=True,
-            ))(y)
-        y = Dropout(0.2)(y)
-        y = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            return_sequences=True,
-            ))(y)
-        y = Dropout(0.2)(y)
-        y = Bidirectional(LSTM(
-            units= self._ml['hidden'],
-            return_sequences=False,
-            ))(y)
+        for k in range(layers):
+            if k != layers-1:
+                s = True
+            else:
+                s = False
+            y = Dropout(dropout_rate)(y)
+            y = Bidirectional(LSTM(
+                units=hidden,
+                return_sequences=s,
+                ))(y)
 
         merged = Concatenate()([x,y])
         label = Dense( units= dimension )(merged)
-        output = Activation('sigmoid')(label)
+        output = Activation(activation)(label)
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
-        optimizer = Adam(lr=0.001,beta_1=0.9,beta_2=0.999)
-
         base = model
         if gpus>1:
             model = multi_gpu_model(model,gpus=gpus)
