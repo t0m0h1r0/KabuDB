@@ -303,7 +303,7 @@ if __name__ == '__main__':
         x,y,z = a._generate(data)
         f = functools.partial(a._objective,x,y)
 
-        study = optuna.create_study()
+        study = optuna.create_study(storage='sqlite:///study.db')
         study.optimize(f,n_trials=100)
 
         parameters = study.best_params
