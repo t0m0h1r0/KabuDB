@@ -114,7 +114,7 @@ class KabuQRNN:
 
     def _objective(self,x,y,trial):
         layers = trial.suggest_int('layers',1,10)
-        hidden = trial.suggest_int('hidden',64,256)
+        hidden = trial.suggest_int('hidden',64,512)
         dropout_rate = trial.suggest_uniform('dropout_rate',0,1)
         activation = trial.suggest_categorical('activation',['sigmoid','relu'])
         optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop'])
@@ -178,7 +178,7 @@ class KabuQRNN:
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
             validation_split=0.3,
-            shuffle=False,
+            #shuffle=False,
             callbacks=[early_stopping])
         return history
 
@@ -294,19 +294,22 @@ if __name__ == '__main__':
         base.summary()
         a._calculate(model,x,y)
         a._save(base)
+
     elif(args.visualize):
         from keras.utils import plot_model
         model,base = a._build(gpus=args.gpus, **parameters)
         a._load(model)
         base.summary()
         plot_model(base, to_file='model.png')
+
     elif(args.optimize):
         import optuna, functools
         x,y,z = a._generate(data)
         f = functools.partial(a._objective,x,y)
 
         study = optuna.create_study()
-        study.optimize(f,n_trials=100)
+        study.optimize(f,n_trials=1000)
+
         parameters = study.best_params
         print('Result:',parameters)
         with open(json_filename,'r') as fp:
@@ -317,6 +320,7 @@ if __name__ == '__main__':
         model,base = a._build(gpus=args.gpus, **parameters)
         a._load(model)
         a._validate(model,x,y)
+
     else:
         x,y,z = a._generate(data)
         model,base = a._build(gpus=args.gpus, **parameters)
