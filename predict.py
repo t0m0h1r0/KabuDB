@@ -179,8 +179,8 @@ class KabuQRNN:
             x, y,
             epochs=self._ml['epoch'],
             batch_size=self._ml['batch'],
-            validation_split=0.3,
-            #shuffle=False,
+            validation_split=0.05,
+            shuffle=False,
             callbacks=[early_stopping])
         return history
 
