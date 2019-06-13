@@ -109,14 +109,20 @@ class KabuQRNN:
         return [x,wx],y,[z,wz]
 
     def _objective(self,x,y,trial):
-        layers = [trial.suggest_int('layers',1,10)]*2
+        layer_r = trial.suggest_int('layers',1,10)
+        layer_w = trial.suggest_int('layers',1,10)
         hidden = trial.suggest_int('hidden',64,256)
         dropout_rate = trial.suggest_uniform('dropout_rate',0,1)
         activation = trial.suggest_categorical('activation',['sigmoid','relu'])
         optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop'])
 
         model, base = self._build(
-            layers=layers, hidden=hidden, activation=activation, optimizer=optimizer, dropout_rate=dropout_rate)
+            layers=[layer_r,layer_w],
+            hidden=hidden,
+            activation=activation,
+            optimizer=optimizer,
+            dropout_rate=dropout_rate,
+            )
         history = self._calculate(model,x,y)
         return -np.amax(history.history['val_acc'])
 
