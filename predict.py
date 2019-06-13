@@ -23,7 +23,7 @@ from qrnn import QRNN
 import scipy.stats as ss
 
 class KabuQRNN:
-    def __init__(self,filename='^N225.csv'):
+    def __init__(self,filename='^N225.csv',gpus=1):
         self._data =[]
         self._filename = filename
         self._config = {
@@ -38,11 +38,7 @@ class KabuQRNN:
         self._scaler = MinMaxScaler(feature_range=(-1, 1))
         #self._scaler = PowerTransformer(method='box-cox',standardize=True)
         #self._scaler = FunctionTransformer(func=lambda x:x, inverse_func=lambda x:x)
-        self._x = []
-        self._y = []
-        self._z = []
-        self._wx = []
-        self._wz = []
+        self._gpus = gpus
 
     def _read(self):
         self._data = pd.read_csv(self._filename,index_col=0)
@@ -119,13 +115,13 @@ class KabuQRNN:
         activation = trial.suggest_categorical('activation',['sigmoid','relu'])
         optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop'])
 
-        model, base = self._build(gpus=1,
+        model, base = self._build(
             layers=layers, hidden=hidden, activation=activation, optimizer=optimizer, dropout_rate=dropout_rate)
         history = self._calculate(model,x,y)
         return -np.amax(history.history['val_acc'])
 
 
-    def _build(self, gpus=1, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
+    def _build(self, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
         window=60
@@ -166,8 +162,8 @@ class KabuQRNN:
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
         base = model
-        if gpus>1:
-            model = multi_gpu_model(model,gpus=gpus)
+        if self._gpus>1:
+            model = multi_gpu_model(model,gpus=self._gpus)
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         return model,base
 
@@ -207,7 +203,7 @@ class KabuQRNN:
             print(input,output,'=>',input-output)
 
 class KabuLSTM(KabuQRNN):
-    def _build(self, gpus=1, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
+    def _build(self, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
 
@@ -243,8 +239,8 @@ class KabuLSTM(KabuQRNN):
 
         model = Model(inputs=[input_raw,input_wav],outputs=output)
         base = model
-        if gpus>1:
-            model = multi_gpu_model(model,gpus=gpus)
+        if self._gpus>1:
+            model = multi_gpu_model(model,gpus=self._gpus)
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         return model,base
 
@@ -283,21 +279,21 @@ if __name__ == '__main__':
             parameters = json.load(fp)
 
     if(args.qrnn):
-        a=KabuQRNN(filename=args.csv_filename)
+        a=KabuQRNN(filename=args.csv_filename,gpus=args.gpus)
     else:
-        a=KabuLSTM(filename=args.csv_filename)
+        a=KabuLSTM(filename=args.csv_filename,gpus=args.gpus)
 
     data = a._read()
     if(args.learn):
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus, **parameters)
+        model,base = a._build(**parameters)
         base.summary()
         a._calculate(model,x,y)
         a._save(base)
 
     elif(args.visualize):
         from keras.utils import plot_model
-        model,base = a._build(gpus=args.gpus, **parameters)
+        model,base = a._build(**parameters)
         a._load(model)
         base.summary()
         plot_model(base, to_file='model.png')
@@ -317,12 +313,12 @@ if __name__ == '__main__':
 
     elif(args.compare_all):
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus, **parameters)
+        model,base = a._build(**parameters)
         a._load(model)
         a._validate(model,x,y)
 
     else:
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus, **parameters)
+        model,base = a._build(**parameters)
         a._load(model)
         a._predict(model,data)
