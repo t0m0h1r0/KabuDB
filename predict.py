@@ -132,8 +132,8 @@ class KabuQRNN:
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
-        for k in range(layers):
-            if k != layers-1:
+        for k in range(layers[0]):
+            if k != layers[0]-1:
                 s = True
             else:
                 s = False
@@ -147,8 +147,8 @@ class KabuQRNN:
 
         input_wav = Input(shape=(dimension,days))
         y = input_wav
-        for k in range(layers):
-            if k != layers-1:
+        for k in range(layers[1]):
+            if k != layers[1]-1:
                 s = True
             else:
                 s = False
@@ -213,8 +213,8 @@ class KabuLSTM(KabuQRNN):
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
-        for k in range(layers):
-            if k != layers-1:
+        for k in range(layers[0]):
+            if k != layers[0]-1:
                 s = True
             else:
                 s = False
@@ -226,8 +226,8 @@ class KabuLSTM(KabuQRNN):
 
         input_wav = Input(shape=(dimension,days))
         y = input_wav
-        for k in range(layers):
-            if k != layers-1:
+        for k in range(layers[1]):
+            if k != layers[1]-1:
                 s = True
             else:
                 s = False
