@@ -124,7 +124,7 @@ class KabuQRNN:
             dropout_rate=dropout_rate,
             )
         history = self._calculate(model,x,y)
-        return -np.amax(history.history['val_acc'])
+        return np.amax(history.history['val_acc'])
 
 
     def _build(self, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
@@ -315,7 +315,7 @@ if __name__ == '__main__':
         if os.path.exists(db_name):
             study = optuna.load_study(study_name=name,storage='sqlite:///'+db_name)
         else:
-            study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name)
+            study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='maximize')
         study.optimize(f,n_trials=100)
 
         best = study.best_params
