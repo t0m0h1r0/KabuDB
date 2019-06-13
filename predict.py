@@ -126,7 +126,7 @@ class KabuQRNN:
             dropout_rate=dropout_rate,
             )
         history = self._calculate(model,x,y,batch_size=batch_size)
-        return history.history['val_loss'][-1]
+        return np.amin(history.history['val_loss'])
         #return np.amax(history.history['val_acc'])
 
 
