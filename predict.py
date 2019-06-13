@@ -114,7 +114,9 @@ class KabuQRNN:
         hidden = trial.suggest_int('hidden',64,256)
         dropout_rate = trial.suggest_uniform('dropout_rate',0,1)
         activation = trial.suggest_categorical('activation',['sigmoid','relu'])
-        optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop', 'adamax', 'nadam'])
+        optimizer = trial.suggest_categorical('optimizer', ['adam', 'rmsprop', 'adamax', 'nadam'])
+        batch_size = trial.suggest_categorical('batch_size', 64, 512, 64)
+        #optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop', 'adamax', 'nadam'])
 
         model, base = self._build(
             layers=[layer_r,layer_w],
@@ -123,7 +125,7 @@ class KabuQRNN:
             optimizer=optimizer,
             dropout_rate=dropout_rate,
             )
-        history = self._calculate(model,x,y)
+        history = self._calculate(model,x,y,batch_size=batch_size)
         return np.amax(history.history['val_loss'])
         #return np.amax(history.history['val_acc'])
 
@@ -174,12 +176,12 @@ class KabuQRNN:
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         return model,base
 
-    def _calculate(self,model,x,y):
+    def _calculate(self,model,x,y,batch_size=512):
         early_stopping = EarlyStopping(patience=50, verbose=1)
         history = model.fit(
             x, y,
             epochs=self._ml['epoch'],
-            batch_size=self._ml['batch'],
+            batch_size=batch_size,
             validation_split=0.05,
             shuffle=False,
             callbacks=[early_stopping])
