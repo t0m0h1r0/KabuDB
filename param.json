@@ -1,0 +1,7 @@
+{
+    "layers": 6,
+    "hidden": 256,
+    "dropout_rate": 0.0023821281206016787,
+    "activation": "sigmoid",
+    "optimizer": "rmsprop"
+}

@@ -261,14 +261,8 @@ def download(filename):
 
 
 if __name__ == '__main__':
-    parameters = {
-        'layers': 6,
-        'hidden': 256,
-        'dropout_rate': 0.0023821281206016787,
-        'activation': 'sigmoid',
-        'optimizer': 'rmsprop',
-        }
-
+    import json
+    json_filename = 'param.json'
     import argparse as ap
     parser = ap.ArgumentParser()
     parser.add_argument('-l','--learn',action='store_true')
@@ -283,6 +277,10 @@ if __name__ == '__main__':
 
     if(args.update_csv):
         download(args.csv_filename)
+
+    if(not args.optimize):
+        with open(json_filename,'r') as fp:
+            parameters = json.load(fp)
 
     if(args.qrnn):
         a=KabuQRNN(filename=args.csv_filename)
@@ -309,7 +307,10 @@ if __name__ == '__main__':
 
         study = optuna.create_study()
         study.optimize(f,n_trials=100)
-        print('Result:',study.best_params)
+        parameters = study.best_params
+        print('Result:',parameters)
+        with open(json_filename,'r') as fp:
+            json.dump(parameters,fp,indent=4)
 
     elif(args.compare_all):
         x,y,z = a._generate(data)
