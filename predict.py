@@ -316,7 +316,7 @@ if __name__ == '__main__':
             study = optuna.load_study(study_name=name,storage='sqlite:///'+db_name)
         else:
             study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='maximize')
-        study.optimize(f,n_trials=100)
+        study.optimize(f,n_trials=1000)
 
         best = study.best_params
         parameters = {
