@@ -109,14 +109,15 @@ class KabuQRNN:
         return [x,wx],y,[z,wz]
 
     def _objective(self,x,y,trial):
-        layers = [trial.suggest_int('layers',1,10)]*2
+        layer_r = trial.suggest_int('layer_r',1,10)
+        layer_w = trial.suggest_int('layer_w',1,10)
         hidden = trial.suggest_int('hidden',64,256)
         dropout_rate = trial.suggest_uniform('dropout_rate',0,1)
         activation = trial.suggest_categorical('activation',['sigmoid','relu'])
         optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop'])
 
         model, base = self._build(
-            layers=layers,
+            layers=[layer_r,layer_w],
             hidden=hidden,
             activation=activation,
             optimizer=optimizer,
@@ -311,7 +312,14 @@ if __name__ == '__main__':
         study = optuna.create_study(storage='sqlite:///study.db')
         study.optimize(f,n_trials=100)
 
-        parameters = study.best_params
+        best = study.best_params
+        parameters = {
+            layers:[best.layer_r,best.layer_w],
+            hidden:best.hidden,
+            activation:best.activation,
+            optimizer:best.optimizer,
+            dropout_rate:best.dropout_rate,
+        }
         print('Result:',parameters)
         with open(json_filename,'r') as fp:
             json.dump(parameters,fp,indent=4)
