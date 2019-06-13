@@ -297,14 +297,14 @@ if __name__ == '__main__':
     data = a._read()
     if(args.learn):
         x,y,z = a._generate(data)
-        model,base = a._build(**parameters)
+        model,base = a._build(**parameters['model'])
         base.summary()
-        a._calculate(model,x,y)
+        a._calculate(model,x,y,**parameters['learning'])
         a._save(base)
 
     elif(args.visualize):
         from keras.utils import plot_model
-        model,base = a._build(**parameters)
+        model,base = a._build(**parameters['model'])
         a._load(model)
         base.summary()
         plot_model(base, to_file='model.png')
@@ -324,11 +324,16 @@ if __name__ == '__main__':
 
         best = study.best_params
         parameters = {
-            layers:[best.layer_r,best.layer_w],
-            hidden:best.hidden,
-            activation:best.activation,
-            optimizer:best.optimizer,
-            dropout_rate:best.dropout_rate,
+            'model':{
+                'layers':[best.layer_r,best.layer_w],
+                'hidden':best.hidden,
+                'activation':best.activation,
+                'optimizer':best.optimizer,
+                'dropout_rate':best.dropout_rate,
+            },
+            'learning':{
+                'batch_size':best.batch_size,
+            },
         }
         print('Result:',parameters)
         with open(json_filename,'r') as fp:
@@ -336,12 +341,12 @@ if __name__ == '__main__':
 
     elif(args.compare_all):
         x,y,z = a._generate(data)
-        model,base = a._build(**parameters)
+        model,base = a._build(**parameters['model'])
         a._load(model)
         a._validate(model,x,y)
 
     else:
         x,y,z = a._generate(data)
-        model,base = a._build(**parameters)
+        model,base = a._build(**parameters['model'])
         a._load(model)
         a._predict(model,data)
