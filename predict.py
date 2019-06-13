@@ -292,13 +292,13 @@ if __name__ == '__main__':
     data = a._read()
     if(args.learn):
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus, parameters)
+        model,base = a._build(gpus=args.gpus, **parameters)
         base.summary()
         a._calculate(model,x,y)
         a._save(base)
     elif(args.visualize):
         from keras.utils import plot_model
-        model,base = a._build(gpus=args.gpus, parameters)
+        model,base = a._build(gpus=args.gpus, **parameters)
         a._load(model)
         base.summary()
         plot_model(base, to_file='model.png')
@@ -313,11 +313,11 @@ if __name__ == '__main__':
 
     elif(args.compare_all):
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus, parameters)
+        model,base = a._build(gpus=args.gpus, **parameters)
         a._load(model)
         a._validate(model,x,y)
     else:
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus, parameters)
+        model,base = a._build(gpus=args.gpus, **parameters)
         a._load(model)
         a._predict(model,data)
