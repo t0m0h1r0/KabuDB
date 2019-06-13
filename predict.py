@@ -113,8 +113,8 @@ class KabuQRNN:
         return [x,wx],y,[z,wz]
 
     def _objective(self,x,y,trial):
-        layers = trial.suggest_int('layers',1,10)
-        hidden = trial.suggest_int('hidden',64,512)
+        layers = [trial.suggest_int('layers',1,10)]*2
+        hidden = trial.suggest_int('hidden',64,256)
         dropout_rate = trial.suggest_uniform('dropout_rate',0,1)
         activation = trial.suggest_categorical('activation',['sigmoid','relu'])
         optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop'])
@@ -125,7 +125,7 @@ class KabuQRNN:
         return -np.amax(history.history['val_acc'])
 
 
-    def _build(self, gpus=1, layers=4, hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
+    def _build(self, gpus=1, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
         window=60
@@ -207,7 +207,7 @@ class KabuQRNN:
             print(input,output,'=>',input-output)
 
 class KabuLSTM(KabuQRNN):
-    def _build(self, gpus=1, layers=4, hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
+    def _build(self, gpus=1, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
 
