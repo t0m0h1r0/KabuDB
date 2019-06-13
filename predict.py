@@ -130,7 +130,7 @@ class KabuQRNN:
     def _build(self, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
         days = self._config['term']
         dimension = len(self._data.columns)
-        window=60
+        window=2
 
         input_raw = Input(shape=(days,dimension))
         x = input_raw
