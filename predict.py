@@ -308,7 +308,7 @@ if __name__ == '__main__':
         f = functools.partial(a._objective,x,y)
 
         study = optuna.create_study()
-        study.optimize(f,n_trials=1000)
+        study.optimize(f,n_trials=100)
 
         parameters = study.best_params
         print('Result:',parameters)
