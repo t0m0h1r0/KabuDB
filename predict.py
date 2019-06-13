@@ -285,8 +285,10 @@ if __name__ == '__main__':
             parameters = json.load(fp)
 
     if(args.qrnn):
+        name = 'QRNN'
         a=KabuQRNN(filename=args.csv_filename,gpus=args.gpus)
     else:
+        name = 'LSTM'
         a=KabuLSTM(filename=args.csv_filename,gpus=args.gpus)
 
     data = a._read()
@@ -305,11 +307,15 @@ if __name__ == '__main__':
         plot_model(base, to_file='model.png')
 
     elif(args.optimize):
-        import optuna, functools
+        import optuna, functools, os
         x,y,z = a._generate(data)
         f = functools.partial(a._objective,x,y)
 
-        study = optuna.create_study(storage='sqlite:///study.db')
+        db_name = 'study.db'
+        if os.path.exists(db_name):
+            study = optuna.load_study(study_name=name,storage='sqlite:///'+db_name)
+        else:
+            study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name)
         study.optimize(f,n_trials=100)
 
         best = study.best_params
