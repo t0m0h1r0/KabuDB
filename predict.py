@@ -261,6 +261,14 @@ def download(filename):
 
 
 if __name__ == '__main__':
+    parameters = {
+        'layers': 6,
+        'hidden': 256,
+        'dropout_rate': 0.0023821281206016787,
+        'activation': 'sigmoid',
+        'optimizer': 'rmsprop',
+        }
+
     import argparse as ap
     parser = ap.ArgumentParser()
     parser.add_argument('-l','--learn',action='store_true')
@@ -284,13 +292,13 @@ if __name__ == '__main__':
     data = a._read()
     if(args.learn):
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus)
+        model,base = a._build(gpus=args.gpus, parameters)
         base.summary()
         a._calculate(model,x,y)
         a._save(base)
     elif(args.visualize):
         from keras.utils import plot_model
-        model,base = a._build(gpus=args.gpus)
+        model,base = a._build(gpus=args.gpus, parameters)
         a._load(model)
         base.summary()
         plot_model(base, to_file='model.png')
@@ -305,11 +313,11 @@ if __name__ == '__main__':
 
     elif(args.compare_all):
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus)
+        model,base = a._build(gpus=args.gpus, parameters)
         a._load(model)
         a._validate(model,x,y)
     else:
         x,y,z = a._generate(data)
-        model,base = a._build(gpus=args.gpus)
+        model,base = a._build(gpus=args.gpus, parameters)
         a._load(model)
         a._predict(model,data)
