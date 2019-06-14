@@ -321,7 +321,6 @@ if __name__ == '__main__':
         study.optimize(f,n_trials=args.optimize)
 
         best = study.best_params
-        print(best)
         parameters = {
             'model':{
                 'layers':[best['layer_r'],best['layer_w']],
@@ -334,7 +333,6 @@ if __name__ == '__main__':
                 'batch_size':best['batch_size'],
             },
         }
-        print('Result:',parameters)
         with open(json_filename,'w') as fp:
             json.dump(parameters,fp,indent=4)
 
