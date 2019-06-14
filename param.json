@@ -1,0 +1,32 @@
+{
+    "QRNN": {
+        "model": {
+            "layers": [
+                7,
+                6
+            ],
+            "hidden": 64,
+            "activation": "relu",
+            "optimizer": "rmsprop",
+            "dropout_rate": 0.36316554102059306
+        },
+        "learning": {
+            "batch_size": 512
+        }
+    },
+    "LSTM": {
+        "model": {
+            "layers": [
+                3,
+                7
+            ],
+            "hidden": 132,
+            "activation": "relu",
+            "optimizer": "adam",
+            "dropout_rate": 0.794510081171028
+        },
+        "learning": {
+            "batch_size": 512
+        }
+    }
+}
