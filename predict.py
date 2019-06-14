@@ -316,7 +316,7 @@ if __name__ == '__main__':
         plot_model(base, to_file='model.png')
 
     elif(args.optimize>0):
-        import optuna, functools, os, yaml
+        import optuna, functools
         x,y,z = a._generate(data)
         f = functools.partial(a._objective,x,y)
 
