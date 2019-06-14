@@ -336,7 +336,7 @@ if __name__ == '__main__':
             },
         }
         print('Result:',parameters)
-        with open(json_filename,'r') as fp:
+        with open(json_filename,'w') as fp:
             json.dump(parameters,fp,indent=4)
 
     elif(args.compare_all):
