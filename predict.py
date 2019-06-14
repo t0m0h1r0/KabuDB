@@ -126,7 +126,6 @@ class KabuQRNN:
             )
         history = self._calculate(model,x,y,batch_size=batch_size)
         return np.amin(history.history['val_loss'])
-        #return np.amax(history.history['val_acc'])
 
 
     def _build(self, layers=[4,4], hidden=128, activation='sigmoid', optimizer='adam', dropout_rate=0.2):
@@ -276,7 +275,7 @@ if __name__ == '__main__':
     parser.add_argument('-g','--gpus',type=int,default=1)
     parser.add_argument('-u','--update_csv',action='store_true')
     parser.add_argument('-q','--qrnn',action='store_true')
-    parser.add_argument('-o','--optimize',type=int,default=0)
+    parser.add_argument('-o','--optimize',type=int,nargs='?',default=0)
     args = parser.parse_args()
 
     if(args.update_csv):
