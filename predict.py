@@ -321,9 +321,9 @@ if __name__ == '__main__':
         f = functools.partial(a._objective,x,y)
 
         db_name = 'study.db'
-        if os.path.exists(db_name):
+        try:
             study = optuna.load_study(study_name=name,storage='sqlite:///'+db_name)
-        else:
+        except ValueError:
             study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='minimize')
             #study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='maximize')
         study.optimize(f,n_trials=args.optimize)
