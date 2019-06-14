@@ -276,15 +276,14 @@ if __name__ == '__main__':
     #コマンド引数
     import argparse as ap
     parser = ap.ArgumentParser()
-    parser.add_argument('-l','--learn',action='store_true')
-    parser.add_argument('-v','--visualize',action='store_true')
     parser.add_argument('-c','--code',type=str,default='^N225')
-    parser.add_argument('-a','--compare_all',action='store_true')
-    parser.add_argument('-g','--gpus',type=int,default=1)
-    parser.add_argument('-u','--update_csv',action='store_true')
-    #parser.add_argument('-q','--qrnn',action='store_true')
     parser.add_argument('-m','--method',type=str,choices=['QRNN','LSTM'],default='QRNN')
+    parser.add_argument('-g','--gpus',type=int,default=1)
+    parser.add_argument('-l','--learn',action='store_true')
     parser.add_argument('-o','--optimize',nargs='?',type=int,const=1,default=0)
+    parser.add_argument('-a','--compare_all',action='store_true')
+    parser.add_argument('-v','--visualize',action='store_true')
+    parser.add_argument('-u','--update_csv',action='store_true')
     args = parser.parse_args()
 
     #CSVファイル名
