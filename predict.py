@@ -30,7 +30,7 @@ class KabuQRNN:
             'days':500,
             'keep':2,
             'term':64,
-            'predict':30,
+            'predict':20,
             #'category':(-.3,.0,+.3)
             'category':(-.07,-.03,-.01,-.005,.0,+.005,+.01,+.03,+.07),
             }
@@ -108,12 +108,11 @@ class KabuQRNN:
         wave = pywt.wavedec(dataset2, wavelet='haar', axis=2)
         wave = np.concatenate(wave,axis=2)
 
-
         y = after.values
-        x,z = np.split(dataset,[len(y)])
+        rx,rz = np.split(dataset,[len(y)])
         wx,wz = np.split(wave,[len(y)])
 
-        return [x,wx],y,[z,wz]
+        return [rx,wx],y,[rz,wz]
 
     def _objective(self,x,y,trial):
         layer_r = trial.suggest_int('layer_r',1,10)
@@ -288,9 +287,11 @@ if __name__ == '__main__':
     if(args.update_csv):
         download(args.csv_filename)
 
-    if(not args.optimize):
+    try:
         with open(json_filename,'r') as fp:
             parameters = json.load(fp)
+    except IOError:
+        parameters = {}
 
     if(args.qrnn):
         name = 'QRNN'
@@ -302,20 +303,20 @@ if __name__ == '__main__':
     data = a._read()
     if(args.learn):
         x,y,z = a._generate(data)
-        model,base = a._build(**parameters['model'])
+        model,base = a._build(**parameters[name]['model'])
         base.summary()
-        a._calculate(model,x,y,**parameters['learning'])
+        a._calculate(model,x,y,**parameters[name]['learning'])
         a._save(base)
 
     elif(args.visualize):
         from keras.utils import plot_model
-        model,base = a._build(**parameters['model'])
+        model,base = a._build(**parameters[name]['model'])
         a._load(model)
         base.summary()
         plot_model(base, to_file='model.png')
 
     elif(args.optimize>0):
-        import optuna, functools, os
+        import optuna, functools, os, yaml
         x,y,z = a._generate(data)
         f = functools.partial(a._objective,x,y)
 
@@ -328,7 +329,7 @@ if __name__ == '__main__':
         study.optimize(f,n_trials=args.optimize)
 
         best = study.best_params
-        parameters = {
+        parameters[name] = {
             'model':{
                 'layers':[best['layer_r'],best['layer_w']],
                 'hidden':best['hidden'],
@@ -345,12 +346,12 @@ if __name__ == '__main__':
 
     elif(args.compare_all):
         x,y,z = a._generate(data)
-        model,base = a._build(**parameters['model'])
+        model,base = a._build(**parameters[name]['model'])
         a._load(model)
         a._validate(model,x,y)
 
     else:
         x,y,z = a._generate(data)
-        model,base = a._build(**parameters['model'])
+        model,base = a._build(**parameters[name]['model'])
         a._load(model)
         a._predict(model,data)
