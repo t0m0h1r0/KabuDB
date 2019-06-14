@@ -326,7 +326,7 @@ if __name__ == '__main__':
         print(best)
         parameters = {
             'model':{
-                'layers':[best['layer_r'],best['layer_w'],
+                'layers':[best['layer_r'],best['layer_w']],
                 'hidden':best['hidden'],
                 'activation':best['activation'],
                 'optimizer':best['optimizer'],
