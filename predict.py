@@ -278,12 +278,12 @@ if __name__ == '__main__':
     parser = ap.ArgumentParser()
     parser.add_argument('-l','--learn',action='store_true')
     parser.add_argument('-v','--visualize',action='store_true')
-    #parser.add_argument('-f','--csv_filename',type=str,default='^N225.csv')
     parser.add_argument('-c','--code',type=str,default='^N225')
     parser.add_argument('-a','--compare_all',action='store_true')
     parser.add_argument('-g','--gpus',type=int,default=1)
     parser.add_argument('-u','--update_csv',action='store_true')
-    parser.add_argument('-q','--qrnn',action='store_true')
+    #parser.add_argument('-q','--qrnn',action='store_true')
+    parser.add_argument('-m','--method',type=str,choices=[QRNN,LSTM],default=QRNN)
     parser.add_argument('-o','--optimize',nargs='?',type=int,const=1,default=0)
     args = parser.parse_args()
 
@@ -292,7 +292,7 @@ if __name__ == '__main__':
 
     #最新株価ダウンロード
     if(args.update_csv):
-        download(csv_filename,arg.code)
+        download(csv_filename,args.code)
 
     #パラメタ設定ファイルの読み込み
     try:
@@ -302,12 +302,13 @@ if __name__ == '__main__':
         parameters = {}
 
     #計算インスタンス作成
-    if(args.qrnn):
-        name = 'QRNN'
+    name = args.method
+    if(name=='QRNN'):
         a=KabuQRNN(filename=csv_filename,gpus=args.gpus)
-    else:
-        name = 'LSTM'
+    elif(name=='LSTM'):
         a=KabuLSTM(filename=csv_filename,gpus=args.gpus)
+    else:
+        raise
 
     #データ準備
     data = a._read()
