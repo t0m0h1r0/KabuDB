@@ -288,7 +288,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     #CSVファイル名
-    csv_filename = arg.code+'.csv'
+    csv_filename = args.code+'.csv'
 
     #最新株価ダウンロード
     if(args.update_csv):
