@@ -276,7 +276,7 @@ if __name__ == '__main__':
     parser.add_argument('-g','--gpus',type=int,default=1)
     parser.add_argument('-u','--update_csv',action='store_true')
     parser.add_argument('-q','--qrnn',action='store_true')
-    parser.add_argument('-o','--optimize',action='store_true')
+    parser.add_argument('-o','--optimize',type=int,default=0)
     args = parser.parse_args()
 
     if(args.update_csv):
@@ -308,7 +308,7 @@ if __name__ == '__main__':
         base.summary()
         plot_model(base, to_file='model.png')
 
-    elif(args.optimize):
+    elif(args.optimize>0):
         import optuna, functools, os
         x,y,z = a._generate(data)
         f = functools.partial(a._objective,x,y)
@@ -319,7 +319,7 @@ if __name__ == '__main__':
         else:
             study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='minimize')
             #study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='maximize')
-        study.optimize(f,n_trials=1)
+        study.optimize(f,n_trials=args.optimize)
 
         best = study.best_params
         print(best)
