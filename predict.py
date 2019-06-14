@@ -283,7 +283,7 @@ if __name__ == '__main__':
     parser.add_argument('-g','--gpus',type=int,default=1)
     parser.add_argument('-u','--update_csv',action='store_true')
     #parser.add_argument('-q','--qrnn',action='store_true')
-    parser.add_argument('-m','--method',type=str,choices=[QRNN,LSTM],default=QRNN)
+    parser.add_argument('-m','--method',type=str,choices=['QRNN','LSTM'],default='QRNN')
     parser.add_argument('-o','--optimize',nargs='?',type=int,const=1,default=0)
     args = parser.parse_args()
 
