@@ -257,14 +257,14 @@ class KabuLSTM(KabuQRNN):
         model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
         return model,base
 
-def download(filename):
+def download(filename,code='^N225'):
     import pandas_datareader.data as pdr
     import yfinance as yf
     import datetime as dt
     yf.pdr_override()
 
     today = '{0:%Y-%m-%d}'.format(dt.date.today())
-    data = pdr.get_data_yahoo('^N225','2000-01-01',)
+    data = pdr.get_data_yahoo(code,'2000-01-01',)
     data.to_csv(filename)
 
 
@@ -272,11 +272,14 @@ def download(filename):
 if __name__ == '__main__':
     import json
     json_filename = 'param.json'
+
+    #コマンド引数
     import argparse as ap
     parser = ap.ArgumentParser()
     parser.add_argument('-l','--learn',action='store_true')
     parser.add_argument('-v','--visualize',action='store_true')
-    parser.add_argument('-f','--csv_filename',type=str,default='^N225.csv')
+    #parser.add_argument('-f','--csv_filename',type=str,default='^N225.csv')
+    parser.add_argument('-c','--code',type=str,default='^N225')
     parser.add_argument('-a','--compare_all',action='store_true')
     parser.add_argument('-g','--gpus',type=int,default=1)
     parser.add_argument('-u','--update_csv',action='store_true')
@@ -284,23 +287,32 @@ if __name__ == '__main__':
     parser.add_argument('-o','--optimize',nargs='?',type=int,const=1,default=0)
     args = parser.parse_args()
 
-    if(args.update_csv):
-        download(args.csv_filename)
+    #CSVファイル名
+    csv_filename = arg.code+'.csv'
 
+    #最新株価ダウンロード
+    if(args.update_csv):
+        download(csv_filename,arg.code)
+
+    #パラメタ設定ファイルの読み込み
     try:
         with open(json_filename,'r') as fp:
             parameters = json.load(fp)
     except IOError:
         parameters = {}
 
+    #計算インスタンス作成
     if(args.qrnn):
         name = 'QRNN'
-        a=KabuQRNN(filename=args.csv_filename,gpus=args.gpus)
+        a=KabuQRNN(filename=csv_filename,gpus=args.gpus)
     else:
         name = 'LSTM'
-        a=KabuLSTM(filename=args.csv_filename,gpus=args.gpus)
+        a=KabuLSTM(filename=csv_filename,gpus=args.gpus)
 
+    #データ準備
     data = a._read()
+
+    #学習
     if(args.learn):
         x,y,z = a._generate(data)
         model,base = a._build(**parameters[name]['model'])
@@ -308,13 +320,7 @@ if __name__ == '__main__':
         a._calculate(model,x,y,**parameters[name]['learning'])
         a._save(base)
 
-    elif(args.visualize):
-        from keras.utils import plot_model
-        model,base = a._build(**parameters[name]['model'])
-        a._load(model)
-        base.summary()
-        plot_model(base, to_file='model.png')
-
+    #ハイパーパラメタ最適化
     elif(args.optimize>0):
         import optuna, functools
         x,y,z = a._generate(data)
@@ -325,7 +331,6 @@ if __name__ == '__main__':
             study = optuna.load_study(study_name=name,storage='sqlite:///'+db_name)
         except ValueError:
             study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='minimize')
-            #study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='maximize')
         study.optimize(f,n_trials=args.optimize)
 
         best = study.best_params
@@ -344,12 +349,22 @@ if __name__ == '__main__':
         with open(json_filename,'w') as fp:
             json.dump(parameters,fp,indent=4)
 
+    #過去データとの比較
     elif(args.compare_all):
         x,y,z = a._generate(data)
         model,base = a._build(**parameters[name]['model'])
         a._load(model)
         a._validate(model,x,y)
 
+    #モデル出力
+    elif(args.visualize):
+        from keras.utils import plot_model
+        model,base = a._build(**parameters[name]['model'])
+        a._load(model)
+        base.summary()
+        plot_model(base, to_file='model.png')
+
+    #予測
     else:
         x,y,z = a._generate(data)
         model,base = a._build(**parameters[name]['model'])
