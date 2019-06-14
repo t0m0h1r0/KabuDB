@@ -42,6 +42,8 @@ class KabuQRNN:
 
     def _read(self):
         self._data = pd.read_csv(self._filename,index_col=0)
+
+        #計算に利用しない列を削除
         self._data = self._data.drop('Volume',axis=1)
         self._data = self._data.drop('Adj Close',axis=1)
         '''
@@ -50,10 +52,16 @@ class KabuQRNN:
         self._data = self._data.drop('Low',axis=1)
         self._data = self._data.drop('Adj Close',axis=1)
         '''
+
+        #列名を番号にする(後でソートしても順番を維持するため)前に退避する
+        self._columns = self._data.columns.values
+        self._data.columns = range(len(self._data.columns))
+
+        #使えない&使わない行を削除
         self._data = self._data.dropna(how='any')
         self._data = self._data[-self._config['days']:]
-        self._data = self._data.sort_index(axis=1)
-        #self._data = np.log(self._data)[-self._config['days']:]
+
+        #データを整形
         data = pd.DataFrame(self._scaler.fit_transform(self._data.values),
             index=self._data.index, columns=self._data.columns)
         return data
@@ -62,7 +70,6 @@ class KabuQRNN:
         model.save(self._filename+'.h5')
 
     def _load(self,model):
-        #model = load_model(self._filename+'.h5')
         model.load_weights(self._filename+'.h5')
 
     def _generate(self, data):
