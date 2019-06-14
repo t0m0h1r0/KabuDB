@@ -332,7 +332,7 @@ if __name__ == '__main__':
                 'dropout_rate':best['dropout_rate'],
             },
             'learning':{
-                'batch_size':best.batch_size,
+                'batch_size':best['batch_size'],
             },
         }
         print('Result:',parameters)
