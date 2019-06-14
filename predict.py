@@ -115,8 +115,8 @@ class KabuQRNN:
         dropout_rate = trial.suggest_uniform('dropout_rate',0,1)
         activation = trial.suggest_categorical('activation',['sigmoid','relu'])
         optimizer = trial.suggest_categorical('optimizer', ['adam', 'rmsprop', 'adamax', 'nadam'])
-        batch_size = trial.suggest_int('batch_size', 64, 512)
-        #optimizer = trial.suggest_categorical('optimizer', ['sgd', 'adam', 'rmsprop', 'adamax', 'nadam'])
+        #batch_size = trial.suggest_int('batch_size', 64, 512)
+        batch_size = 512
 
         model, base = self._build(
             layers=[layer_r,layer_w],
@@ -320,16 +320,17 @@ if __name__ == '__main__':
         else:
             study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='minimize')
             #study = optuna.create_study(study_name=name,storage='sqlite:///'+db_name,direction='maximize')
-        study.optimize(f,n_trials=1000)
+        study.optimize(f,n_trials=1)
 
         best = study.best_params
+        print(best)
         parameters = {
             'model':{
-                'layers':[best.layer_r,best.layer_w],
-                'hidden':best.hidden,
-                'activation':best.activation,
-                'optimizer':best.optimizer,
-                'dropout_rate':best.dropout_rate,
+                'layers':[best['layer_r'],best['layer_w'],
+                'hidden':best['hidden'],
+                'activation':best['activation'],
+                'optimizer':best['optimizer'],
+                'dropout_rate':best['dropout_rate'],
             },
             'learning':{
                 'batch_size':best.batch_size,
